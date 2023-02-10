@@ -18,7 +18,11 @@ enum _RNG_ErrorID
     _RNG_ERRORID_EXPARRAY_MALLOC = 0x700030200,
     _RNG_ERRORID_EXPPDFARRAY_MALLOC = 0x700040200,
     _RNG_ERRORID_EXPCDFARRAY_MALLOC = 0x700050200,
-    _RNG_ERRORID_EXPICDFARRAY_MALLOC = 0x700060200
+    _RNG_ERRORID_EXPICDFARRAY_MALLOC = 0x700060200,
+    _RNG_ERRORID_NORMALARRAY_MALLOC = 0x700030700,
+    _RNG_ERRORID_NORMALPDFARRAY_MALLOC = 0x700080200,
+    _RNG_ERRORID_NORMALCDFARRAY_MALLOC = 0x700090200,
+    _RNG_ERRORID_NORMALICDFARRAY_MALLOC = 0x7000A0200
 };
 
 #define _RNG_ERRORMES_MALLOC "Unable to allocate memory (Size: %lu)"
@@ -67,79 +71,171 @@ void RNG_Float_ArrayM(uint64_t *Seed, double Min, double Max, double *Array, siz
 
 // Get a random number from an exponential distibution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
+// x0: The minimu x possible
 // l: The length scale of the distribution
-double RNG_Exp(uint64_t *Seed, double l);
+double RNG_Exp(uint64_t *Seed, double x0, double l);
 
 // Get an array of random numbers from an exponential distribution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Size: The size of the array
-double *RNG_Exp_Array(uint64_t *Seed, double l, size_t Size);
+double *RNG_Exp_Array(uint64_t *Seed, double x0, double l, size_t Size);
 
 // Fill an array with random numbers from an exponential distribution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Array The array to fill
 // Size: The size of the array
-void RNG_Exp_ArrayM(uint64_t *Seed, double l, double *Array, size_t Size);
+void RNG_Exp_ArrayM(uint64_t *Seed, double x0, double l, double *Array, size_t Size);
 
 // Get the PDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
-double RNG_ExpPDF(double x, double l);
+double RNG_ExpPDF(double x, double x0, double l);
 
 // Get an array of the PDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Size: The size of the array
-double *RNG_ExpPDF_Array(double *x, double l, size_t Size);
+double *RNG_ExpPDF_Array(double *x, double x0, double l, size_t Size);
 
 // Fill an array of the PDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Array The array to fill
 // Size: The size of the array
-void *RNG_ExpPDF_ArrayM(double *x, double l, double *Array, size_t Size);
+void *RNG_ExpPDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
 // Get the CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
-double RNG_ExpCDF(double x, double l);
+double RNG_ExpCDF(double x, double x0, double l);
 
 // Get an array of the CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Size: The size of the array
-double *RNG_ExpCDF_Array(double *x, double l, size_t Size);
+double *RNG_ExpCDF_Array(double *x, double x0, double l, size_t Size);
 
 // Fill an array of the CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Array The array to fill
 // Size: The size of the array
-void *RNG_ExpCDF_ArrayM(double *x, double l, double *Array, size_t Size);
+void *RNG_ExpCDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
 // Get the inverse CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
-double RNG_ExpICDF(double y, double l);
+double RNG_ExpICDF(double y, double x0, double l);
 
 // Get an array of the inverse CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Size: The size of the array
-double *RNG_ExpICDF_Array(double *y, double l, size_t Size);
+double *RNG_ExpICDF_Array(double *y, double x0, double l, size_t Size);
 
 // Fill an array of the inverse CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-values to get the y-value for
+// x0: The minimu x possible
 // l: The length scale of the distribution
 // Array The array to fill
 // Size: The size of the array
-void *RNG_ExpICDF_ArrayM(double *y, double l, double *Array, size_t Size);
+void *RNG_ExpICDF_ArrayM(double *y, double x0, double l, double *Array, size_t Size);
 
-// DoubleExp
+// Get a random number from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// Seed: The seed to use and update, NULL to use global seed
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+double RNG_Normal(uint64_t *Seed, double Mu, double Sigma);
 
-// Normal
+// Get an array of random numbers from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// Seed: The seed to use and update, NULL to use global seed
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Size: The size of the array
+double *RNG_Normal_Array(uint64_t *Seed, double Mu, double Sigma, size_t Size);
+
+// Fill an array with random numbers from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// Seed: The seed to use and update, NULL to use global seed
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Array The array to fill
+// Size: The size of the array
+void RNG_Normal_ArrayM(uint64_t *Seed, double Mu, double Sigma, double *Array, size_t Size);
+
+// Get the PDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-value to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+double RNG_NormalPDF(double x, double Mu, double Sigma);
+
+// Get an array of the PDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Size: The size of the array
+double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size);
+
+// Fill an array of the PDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Array The array to fill
+// Size: The size of the array
+void *RNG_NormalPDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
+
+// Get the CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-value to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+double RNG_NormalCDF(double x, double Mu, double Sigma);
+
+// Get an array of the CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Size: The size of the array
+double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size);
+
+// Fill an array of the CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Array The array to fill
+// Size: The size of the array
+void *RNG_NormalCDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
+
+// Get the inverse CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-value to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+double RNG_NormalICDF(double y, double Mu, double Sigma);
+
+// Get an array of the inverse CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Size: The size of the array
+double *RNG_NormalICDF_Array(double *y, double Mu, double Sigma, size_t Size);
+
+// Fill an array of the inverse CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
+// x: The x-values to get the y-value for
+// Mu: The mean of the distribution
+// Sigma: The standard deviation of the distribution
+// Array The array to fill
+// Size: The size of the array
+void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size);
 
 // Poisson
 
@@ -147,12 +243,36 @@ void *RNG_ExpICDF_ArrayM(double *y, double l, double *Array, size_t Size);
 
 // Monte carlo
 
+// From libit
+double erfinv(double x);
+
 // Constants
 #define RNG_MAX 18446744073709551616.
 #define RNG_MULTIPLIER 6364136223846793005
 #define RNG_CONSTANT 1442695040888963407
 
-uint64_t _RNG_GlobalSeed = 0;
+// For inverse error function
+#define erfinv_a3 -0.140543331
+#define erfinv_a2 0.914624893
+#define erfinv_a1 -1.645349621
+#define erfinv_a0 0.886226899
+
+#define erfinv_b4 0.012229801
+#define erfinv_b3 -0.329097515
+#define erfinv_b2 1.442710462
+#define erfinv_b1 -2.118377725
+#define erfinv_b0 1
+
+#define erfinv_c3 1.641345311
+#define erfinv_c2 3.429567803
+#define erfinv_c1 -1.62490649
+#define erfinv_c0 -1.970840454
+
+#define erfinv_d2 1.637067800
+#define erfinv_d1 3.543889200
+#define erfinv_d0 1
+
+    uint64_t _RNG_GlobalSeed = 0;
 
 // Get a random uint32_t and update the seed to be that number
 // Seed (uint64_t): The seed to use and update
@@ -244,7 +364,7 @@ void RNG_Float_ArrayM(uint64_t *Seed, double Min, double Max, double *Array, siz
         *List = Min + RNG_FastFloat(*Seed) * (Max - Min);
 }
 
-double RNG_Exp(uint64_t *Seed, double l)
+double RNG_Exp(uint64_t *Seed, double x0, double l)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -256,10 +376,10 @@ double RNG_Exp(uint64_t *Seed, double l)
     double Uniform = RNG_FastFloat(*Seed);
 
     // Get from current distribution
-    return -l * log(1 - Uniform);
+    return x0 - l * log(1 - Uniform);
 }
 
-double *RNG_Exp_Array(uint64_t *Seed, double l, size_t Size)
+double *RNG_Exp_Array(uint64_t *Seed, double x0, double l, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -271,12 +391,12 @@ double *RNG_Exp_Array(uint64_t *Seed, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_Exp_ArrayM(Seed, l, Array, Size);
+    RNG_Exp_ArrayM(Seed, x0, l, Array, Size);
 
     return Array;
 }
 
-void RNG_Exp_ArrayM(uint64_t *Seed, double l, double *Array, size_t Size)
+void RNG_Exp_ArrayM(uint64_t *Seed, double x0, double l, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -291,20 +411,20 @@ void RNG_Exp_ArrayM(uint64_t *Seed, double l, double *Array, size_t Size)
         double Uniform = RNG_FastFloat(*Seed);
 
         // Get from distribution
-        *List = -l * log(1 - Uniform);
+        *List = x0 - l * log(1 - Uniform);
     }
 }
 
-double RNG_ExpPDF(double x, double l)
+double RNG_ExpPDF(double x, double x0, double l)
 {
     // Calculate constants
     double c = 1 / l;
 
     // Calculate the PDF
-    return ((x < 0) ? (0) : (c * exp(-c * x)));
+    return ((x < x0) ? (0) : (c * exp(-c * (x - x0))));
 }
 
-double *RNG_ExpPDF_Array(double *x, double l, size_t Size)
+double *RNG_ExpPDF_Array(double *x, double x0, double l, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -316,31 +436,31 @@ double *RNG_ExpPDF_Array(double *x, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpPDF_ArrayM(x, l, Array, Size);
+    RNG_ExpPDF_ArrayM(x, x0, l, Array, Size);
 
     return Array;
 }
 
-void *RNG_ExpPDF_ArrayM(double *x, double l, double *Array, size_t Size)
+void *RNG_ExpPDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size)
 {
     // Calculate constants
     double c = 1 / l;
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
-        *List = ((*x < 0) ? (0) : (c * exp(-c * *x)));
+        *List = ((*x < x0) ? (0) : (c * exp(-c * (*x - x0))));
 }
 
-double RNG_ExpCDF(double x, double l)
+double RNG_ExpCDF(double x, double x0, double l)
 {
     // Calculate constants
     double c = 1 / l;
 
     // Calculate the CDF
-    return ((x < 0) ? (0) : (1 - exp(-c * x)));
+    return ((x < x0) ? (0) : (1 - exp(-c * (x - x0))));
 }
 
-double *RNG_ExpCDF_Array(double *x, double l, size_t Size)
+double *RNG_ExpCDF_Array(double *x, double x0, double l, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -352,28 +472,28 @@ double *RNG_ExpCDF_Array(double *x, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpCDF_ArrayM(x, l, Array, Size);
+    RNG_ExpCDF_ArrayM(x, x0, l, Array, Size);
 
     return Array;
 }
 
-void *RNG_ExpCDF_ArrayM(double *x, double l, double *Array, size_t Size)
+void *RNG_ExpCDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size)
 {
     // Calculate constants
     double c = 1 / l;
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
-        *List = ((*x < 0) ? (0) : (1 - exp(-c * *x)));
+        *List = ((*x < x0) ? (0) : (1 - exp(-c * (*x - x0))));
 }
 
-double RNG_ExpICDF(double y, double l)
+double RNG_ExpICDF(double y, double x0, double l)
 {
     // Calculate the ICDF
-    return -l * log(1 - y);
+    return x0 - l * log(1 - y);
 }
 
-double *RNG_ExpICDF_Array(double *y, double l, size_t Size)
+double *RNG_ExpICDF_Array(double *y, double x0, double l, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -385,16 +505,213 @@ double *RNG_ExpICDF_Array(double *y, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpICDF_ArrayM(y, l, Array, Size);
+    RNG_ExpICDF_ArrayM(y, x0, l, Array, Size);
 
     return Array;
 }
 
-void *RNG_ExpICDF_ArrayM(double *y, double l, double *Array, size_t Size)
+void *RNG_ExpICDF_ArrayM(double *y, double x0, double l, double *Array, size_t Size)
 {
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
-        *List = -l * log(1 - *y);
+        *List = x0 - l * log(1 - *y);
+}
+
+double RNG_Normal(uint64_t *Seed, double Mu, double Sigma)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Get the number from the uniform distribution
+    double Uniform = RNG_FastFloat(*Seed);
+
+    // Get from current distribution
+    return Mu + M_SQRT2 * Sigma * erfinv(2 * Uniform);
+}
+
+double *RNG_Normal_Array(uint64_t *Seed, double Mu, double Sigma, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_NORMALARRAY_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_Exp_ArrayM(Seed, Mu, Sigma, Array, Size);
+
+    return Array;
+}
+
+void RNG_Normal_ArrayM(uint64_t *Seed, double Mu, double Sigma, double *Array, size_t Size)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+    {
+        // Get uniform number
+        double Uniform = RNG_FastFloat(*Seed);
+
+        // Get from distribution
+        *List = Mu + M_SQRT2 * Sigma * erfinv(2 * Uniform);
+    }
+}
+
+double RNG_NormalPDF(double x, double Mu, double Sigma)
+{
+    // Calculate constants
+    double c = 1 / l;
+
+    // Calculate the PDF
+    return ((x < x0) ? (0) : (c * exp(-c * (x - x0))));
+}
+
+double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_EXPPDFARRAY_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_ExpPDF_ArrayM(x, x0, l, Array, Size);
+
+    return Array;
+}
+
+void *RNG_NormalPDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
+{
+    // Calculate constants
+    double c = 1 / l;
+
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+        *List = ((*x < x0) ? (0) : (c * exp(-c * (*x - x0))));
+}
+
+double RNG_NormalCDF(double x, double Mu, double Sigma)
+{
+    // Calculate constants
+    double c = 1 / l;
+
+    // Calculate the CDF
+    return ((x < x0) ? (0) : (1 - exp(-c * (x - x0))));
+}
+
+double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_EXPCDFARRAY_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_ExpCDF_ArrayM(x, x0, l, Array, Size);
+
+    return Array;
+}
+
+void *RNG_NormalCDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
+{
+    // Calculate constants
+    double c = 1 / l;
+
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+        *List = ((*x < x0) ? (0) : (1 - exp(-c * (*x - x0))));
+}
+
+double RNG_NormalICDF(double y, double Mu, double Sigma)
+{
+    // Calculate the ICDF
+    return x0 - l * log(1 - y);
+}
+
+double *RNG_NormalICDF_Array(double *y, double Mu, double Sigma, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_EXPICDFARRAY_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_ExpICDF_ArrayM(y, x0, l, Array, Size);
+
+    return Array;
+}
+
+void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size)
+{
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
+        *List = x0 - l * log(1 - *y);
+}
+
+// From libit
+double erfinv(double x)
+{
+    double x2, r, y;
+    int  sign_x;
+
+    if (x < -1 || x > 1)
+        return NAN;
+
+    if (x == 0)
+        return 0;
+
+    if (x > 0)
+        sign_x = 1;
+
+    else 
+    {
+        sign_x = -1;
+        x = -x;
+    }
+
+    if (x <= 0.7) 
+    {
+        x2 = x * x;
+        r = x * (((erfinv_a3 * x2 + erfinv_a2) * x2 + erfinv_a1) * x2 + erfinv_a0);
+        r /= (((erfinv_b4 * x2 + erfinv_b3) * x2 + erfinv_b2) * x2 + erfinv_b1) * x2 + erfinv_b0;
+    }
+  
+    else 
+    {
+        y = sqrt (-log ((1 - x) / 2));
+        r = (((erfinv_c3 * y + erfinv_c2) * y + erfinv_c1) * y + erfinv_c0);
+        r /= ((erfinv_d2 * y + erfinv_d1) * y + erfinv_d0);
+    }
+
+    r = r * sign_x;
+    x = x * sign_x;
+
+    r -= (erf(r) - x) / (2 / sqrt (M_PI) * exp (-r * r));
+    r -= (erf(r) - x) / (2 / sqrt (M_PI) * exp (-r * r));
+
+    return r;
 }
 
 #endif // RANDOM2_H_INCLUDED
