@@ -519,6 +519,9 @@ void *RNG_ExpICDF_ArrayM(double *y, double x0, double l, double *Array, size_t S
 
 double RNG_Normal(uint64_t *Seed, double Mu, double Sigma)
 {
+    // Calulate constants
+    double A = M_SQRT2 * Sigma;
+
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
 
@@ -529,7 +532,7 @@ double RNG_Normal(uint64_t *Seed, double Mu, double Sigma)
     double Uniform = RNG_FastFloat(*Seed);
 
     // Get from current distribution
-    return Mu + M_SQRT2 * Sigma * erfinv(2 * Uniform);
+    return Mu + A * erfinv(2 * Uniform - 1);
 }
 
 double *RNG_Normal_Array(uint64_t *Seed, double Mu, double Sigma, size_t Size)
@@ -544,13 +547,16 @@ double *RNG_Normal_Array(uint64_t *Seed, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_Exp_ArrayM(Seed, Mu, Sigma, Array, Size);
+    RNG_Normal_ArrayM(Seed, Mu, Sigma, Array, Size);
 
     return Array;
 }
 
 void RNG_Normal_ArrayM(uint64_t *Seed, double Mu, double Sigma, double *Array, size_t Size)
 {
+    // Calulate constants
+    double A = M_SQRT2 * Sigma;
+
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
 
@@ -564,17 +570,18 @@ void RNG_Normal_ArrayM(uint64_t *Seed, double Mu, double Sigma, double *Array, s
         double Uniform = RNG_FastFloat(*Seed);
 
         // Get from distribution
-        *List = Mu + M_SQRT2 * Sigma * erfinv(2 * Uniform);
+        *List = Mu + A * erfinv(2 * Uniform - 1);
     }
 }
 
 double RNG_NormalPDF(double x, double Mu, double Sigma)
 {
     // Calculate constants
-    double c = 1 / l;
+    double A = M_2_SQRTPI / (2 * Sigma * M_SQRT2);
+    double B = 0.5 / (Sigma * Sigma);
 
     // Calculate the PDF
-    return ((x < x0) ? (0) : (c * exp(-c * (x - x0))));
+    return A * exp(-B * (x - Mu) * (x - Mu));
 }
 
 double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size)
@@ -589,7 +596,7 @@ double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpPDF_ArrayM(x, x0, l, Array, Size);
+    RNG_NormalPDF_ArrayM(x, Mu, Sigma, Array, Size);
 
     return Array;
 }
@@ -597,20 +604,21 @@ double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size)
 void *RNG_NormalPDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
 {
     // Calculate constants
-    double c = 1 / l;
+    double A = M_2_SQRTPI / (2 * Sigma * M_SQRT2);
+    double B = 0.5 / (Sigma * Sigma);
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
-        *List = ((*x < x0) ? (0) : (c * exp(-c * (*x - x0))));
+        *List = A * exp(-B * (*x - Mu) * (*x - Mu));
 }
 
 double RNG_NormalCDF(double x, double Mu, double Sigma)
 {
     // Calculate constants
-    double c = 1 / l;
+    double A = 1 / (M_SQRT2 * Sigma);
 
     // Calculate the CDF
-    return ((x < x0) ? (0) : (1 - exp(-c * (x - x0))));
+    return 0.5 * (1 + erf(A * (x - Mu)));
 }
 
 double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size)
@@ -625,7 +633,7 @@ double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpCDF_ArrayM(x, x0, l, Array, Size);
+    RNG_NormalCDF_ArrayM(x, Mu, Sigma, Array, Size);
 
     return Array;
 }
@@ -633,17 +641,20 @@ double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size)
 void *RNG_NormalCDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
 {
     // Calculate constants
-    double c = 1 / l;
+    double A = 1 / (M_SQRT2 * Sigma);
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
-        *List = ((*x < x0) ? (0) : (1 - exp(-c * (*x - x0))));
+        *List = 0.5 * (1 + erf(A * (*x - Mu)));
 }
 
 double RNG_NormalICDF(double y, double Mu, double Sigma)
 {
+    // Calculate constants
+    double A = 2 * Sigma;
+
     // Calculate the ICDF
-    return x0 - l * log(1 - y);
+    return Mu + A * erfinv(2 * y - 1);
 }
 
 double *RNG_NormalICDF_Array(double *y, double Mu, double Sigma, size_t Size)
@@ -658,16 +669,19 @@ double *RNG_NormalICDF_Array(double *y, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpICDF_ArrayM(y, x0, l, Array, Size);
+    RNG_NormalICDF_ArrayM(y, Mu, Sigma, Array, Size);
 
     return Array;
 }
 
 void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size)
 {
+    // Calculate constants
+    double A = 2 * Sigma;
+ 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
-        *List = x0 - l * log(1 - *y);
+        *List = Mu + A * erfinv(2 * *y - 1);
 }
 
 // From libit

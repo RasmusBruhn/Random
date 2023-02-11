@@ -18,11 +18,11 @@ uint64_t *arange(uint64_t Min, uint64_t Step, uint32_t Length);
 // Test Random.h
 int main(int argc, char **argv)
 {
-    size_t Size = 100000;
+    size_t Size = 1000000;
     double *Hist = NULL;
     uint64_t *IntArray = NULL;
     double *FloatArray = NULL;
-    uint32_t Bins = 10;
+    uint32_t Bins = 11;
     double *xFloat = NULL;
     uint64_t *xInt = NULL;
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     printf("Uniform ints: %lu, %lu, %lu\n", RNG_Int(&Seed, 0, Bins - 1), RNG_Int(&Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
 
     IntArray = RNG_Int_Array(&Seed, 0, Bins - 1, Size);
-    Hist = HistInt(0, 9, Bins, IntArray, Size);
+    Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
     PrintFloatArray("Uniform int distribution", Hist, Bins);
 
     free(IntArray);
@@ -51,38 +51,75 @@ int main(int argc, char **argv)
     free(Hist);
 
     // Generate exp
-    printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(&Seed, 1), RNG_Exp(&Seed, 1), RNG_Exp(NULL, 1));
+    printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(&Seed, 0, 1), RNG_Exp(&Seed, 0, 1), RNG_Exp(NULL, 0, 1));
 
-    FloatArray = RNG_Exp_Array(&Seed, 1, Size);
+    FloatArray = RNG_Exp_Array(&Seed, 0, 1, Size);
     Hist = HistFloat(0, 5, Bins, FloatArray, Size);
     PrintFloatArray("Exp distribution", Hist, Bins);
 
     free(FloatArray);
     free(Hist);
 
-    printf("Exp PDF: %.3g, %.3g, %.3g\n", RNG_ExpPDF(0, 1), RNG_ExpPDF(1, 1), RNG_ExpPDF(2, 1));
+    printf("Exp PDF: %.3g, %.3g, %.3g\n", RNG_ExpPDF(0, 0, 1), RNG_ExpPDF(1, 0, 1), RNG_ExpPDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpPDF_Array(xFloat, 1, Size);
+    FloatArray = RNG_ExpPDF_Array(xFloat, 0, 1, Size);
     PrintFloatArray("Exp PDF distribution", FloatArray, Bins);
 
     free(xFloat);
     free(FloatArray);
 
-    printf("Exp CDF: %.3g, %.3g, %.3g\n", RNG_ExpCDF(0, 1), RNG_ExpCDF(1, 1), RNG_ExpCDF(2, 1));
+    printf("Exp CDF: %.3g, %.3g, %.3g\n", RNG_ExpCDF(0, 0, 1), RNG_ExpCDF(1, 0, 1), RNG_ExpCDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpCDF_Array(xFloat, 1, Size);
+    FloatArray = RNG_ExpCDF_Array(xFloat, 0, 1, Size);
     PrintFloatArray("Exp CDF distribution", FloatArray, Bins);
 
     free(xFloat);
     free(FloatArray);
 
-    printf("Exp ICDF: %.3g, %.3g, %.3g\n", RNG_ExpICDF(0, 1), RNG_ExpICDF(0.4, 1), RNG_ExpICDF(0.8, 1));
+    printf("Exp ICDF: %.3g, %.3g, %.3g\n", RNG_ExpICDF(0, 0, 1), RNG_ExpICDF(0.4, 0, 1), RNG_ExpICDF(0.8, 0, 1));
 
     xFloat = linspace(0, 1, Bins);
-    FloatArray = RNG_ExpICDF_Array(xFloat, 1, Size);
+    FloatArray = RNG_ExpICDF_Array(xFloat, 0, 1, Size);
     PrintFloatArray("Exp ICDF distribution", FloatArray, Bins);
+
+    free(xFloat);
+    free(FloatArray);
+
+    // Generate normal
+    printf("Normal: %.3g, %.3g, %.3g\n", RNG_Normal(&Seed, 0, 1), RNG_Normal(&Seed, 0, 1), RNG_Normal(NULL, 0, 1));
+
+    FloatArray = RNG_Normal_Array(&Seed, 0, 1, Size);
+    Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
+    PrintFloatArray("Normal distribution", Hist, Bins);
+
+    free(FloatArray);
+    free(Hist);
+
+    printf("Normal PDF: %.3g, %.3g, %.3g\n", RNG_NormalPDF(-1, 0, 1), RNG_NormalPDF(0, 0, 1), RNG_NormalPDF(1, 0, 1));
+
+    xFloat = linspace(-3, 3, Bins);
+    FloatArray = RNG_NormalPDF_Array(xFloat, 0, 1, Size);
+    PrintFloatArray("Normal PDF distribution", FloatArray, Bins);
+
+    free(xFloat);
+    free(FloatArray);
+
+    printf("Normal CDF: %.3g, %.3g, %.3g\n", RNG_NormalCDF(-1, 0, 1), RNG_NormalCDF(0, 0, 1), RNG_NormalCDF(1, 0, 1));
+
+    xFloat = linspace(-3, 3, Bins);
+    FloatArray = RNG_NormalCDF_Array(xFloat, 0, 1, Size);
+    PrintFloatArray("Normal CDF distribution", FloatArray, Bins);
+
+    free(xFloat);
+    free(FloatArray);
+
+    printf("Normal ICDF: %.3g, %.3g, %.3g\n", RNG_NormalICDF(0.1, 0, 1), RNG_NormalICDF(0.5, 0, 1), RNG_NormalICDF(0.9, 0, 1));
+
+    xFloat = linspace(0, 1, Bins);
+    FloatArray = RNG_NormalICDF_Array(xFloat, 0, 1, Size);
+    PrintFloatArray("Normal ICDF distribution", FloatArray, Bins);
 
     free(xFloat);
     free(FloatArray);
