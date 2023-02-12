@@ -27,13 +27,13 @@ int main(int argc, char **argv)
     uint64_t *xInt = NULL;
 
     // Generate seed
-    uint64_t Seed = RNG_GenSeed();
-    printf("Seed: %lu\n", Seed);
+    RNG_Seed Seed = RNG_GenSeed();
+    printf("Seed: %lu\n", *Seed);
 
     // Generate uniform ints
-    printf("Uniform ints: %lu, %lu, %lu\n", RNG_Int(&Seed, 0, Bins - 1), RNG_Int(&Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
+    printf("Uniform ints: %lu, %lu, %lu\n", RNG_Int(Seed, 0, Bins - 1), RNG_Int(Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
 
-    IntArray = RNG_Int_Array(&Seed, 0, Bins - 1, Size);
+    IntArray = RNG_Int_Array(Seed, 0, Bins - 1, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
     PrintFloatArray("Uniform int distribution", Hist, Bins);
 
@@ -41,9 +41,9 @@ int main(int argc, char **argv)
     free(Hist);
 
     // Generate uniform floats
-    printf("Uniform floats: %.3g, %.3g, %.3g\n", RNG_Float(&Seed, 0, 1), RNG_Float(&Seed, 0, 1), RNG_Float(NULL, 0, 1));
+    printf("Uniform floats: %.3g, %.3g, %.3g\n", RNG_Float(Seed, 0, 1), RNG_Float(Seed, 0, 1), RNG_Float(NULL, 0, 1));
 
-    FloatArray = RNG_Float_Array(&Seed, 0, 1, Size);
+    FloatArray = RNG_Float_Array(Seed, 0, 1, Size);
     Hist = HistFloat(0, 1, Bins, FloatArray, Size);
     PrintFloatArray("Uniform float distribution", Hist, Bins);
 
@@ -51,9 +51,9 @@ int main(int argc, char **argv)
     free(Hist);
 
     // Generate exp
-    printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(&Seed, 0, 1), RNG_Exp(&Seed, 0, 1), RNG_Exp(NULL, 0, 1));
+    printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(Seed, 0, 1), RNG_Exp(Seed, 0, 1), RNG_Exp(NULL, 0, 1));
 
-    FloatArray = RNG_Exp_Array(&Seed, 0, 1, Size);
+    FloatArray = RNG_Exp_Array(Seed, 0, 1, Size);
     Hist = HistFloat(0, 5, Bins, FloatArray, Size);
     PrintFloatArray("Exp distribution", Hist, Bins);
 
@@ -88,9 +88,9 @@ int main(int argc, char **argv)
     free(FloatArray);
 
     // Generate normal
-    printf("Normal: %.3g, %.3g, %.3g\n", RNG_Normal(&Seed, 0, 1), RNG_Normal(&Seed, 0, 1), RNG_Normal(NULL, 0, 1));
+    printf("Normal: %.3g, %.3g, %.3g\n", RNG_Normal(Seed, 0, 1), RNG_Normal(Seed, 0, 1), RNG_Normal(NULL, 0, 1));
 
-    FloatArray = RNG_Normal_Array(&Seed, 0, 1, Size);
+    FloatArray = RNG_Normal_Array(Seed, 0, 1, Size);
     Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
     PrintFloatArray("Normal distribution", Hist, Bins);
 
@@ -123,6 +123,8 @@ int main(int argc, char **argv)
 
     free(xFloat);
     free(FloatArray);
+
+    RNG_DestroySeed(Seed);
 
     return 0;
 }
