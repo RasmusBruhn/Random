@@ -3,6 +3,12 @@
 #include "Random.h"
 #include <time.h>
 
+typedef struct __NormalParams 
+{
+    double mu;
+    double sigma;
+} NormalParams;
+
 void PrintIntArray(char *Name, uint64_t *Array, size_t Length);
 
 void PrintFloatArray(char *Name, double *Array, size_t Length);
@@ -14,6 +20,22 @@ double *HistFloat(double Min, double Max, uint32_t Bins, double *Array, size_t S
 double *linspace(double Min, double Max, uint32_t Length);
 
 uint64_t *arange(uint64_t Min, uint64_t Step, uint32_t Length);
+
+double NormalPDF(double x, void *Params);
+
+double ExpPDF(double x, void *Params);
+
+double ExpSampling(RNG_Seed Seed, void *Params);
+
+double NormalSampling(RNG_Seed Seed, double Mu, double Sigma);
+
+void NormalPDF_ArrayM(double *x, void *Params, double *Array, size_t Size);
+
+void ExpPDF_ArrayM(double *x, void *Params, double *Array, size_t Size);
+
+void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size);
+
+double *NormalSampling_Array(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
 
 // Test Random.h
 int main(int argc, char **argv)
@@ -124,6 +146,27 @@ int main(int argc, char **argv)
     free(xFloat);
     free(FloatArray);
 
+    // Generate normal using monte carlo
+    printf("Normal: %.3g, %.3g, %.3g\n", NormalSampling(Seed, 0, 1), NormalSampling(Seed, 0, 1), NormalSampling(NULL, 0, 1));
+
+    FloatArray = NormalSampling_Array(Seed, 0, 1, Size);
+    Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
+    PrintFloatArray("Normal distribution", Hist, Bins);
+
+    free(FloatArray);
+    free(Hist);
+
+    NormalParams Params = {.mu = 0, .sigma = 1};
+    FloatArray = malloc(sizeof(double) * Size);
+    ExpSampling_ArrayM(Seed, &Params, FloatArray, Size);
+    Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
+    PrintFloatArray("Double exp distribution", Hist, Bins);
+
+    free(FloatArray);
+    free(Hist);
+
+    
+
     RNG_DestroySeed(Seed);
 
     return 0;
@@ -226,4 +269,92 @@ uint64_t *arange(uint64_t Min, uint64_t Step, uint32_t Length)
     }
 
     return Values;
+}
+
+double NormalPDF(double x, void *Params)
+{
+    return RNG_NormalPDF(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma);
+}
+
+double ExpPDF(double x, void *Params)
+{
+    return M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(-abs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
+}
+
+double ExpSampling(RNG_Seed Seed, void *Params)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Get the number from the uniform distribution
+    double Uniform = RNG_FastFloat(Seed);
+
+    double Sign = 1;
+
+    if (Uniform >= 0.5)
+    {
+        Sign = -1;
+        Uniform -= 0.5;
+    }
+
+    // Get from current distribution
+    return ((NormalParams *)Params)->mu - Sign * ((NormalParams *)Params)->sigma * log(1 - 2 * Uniform);
+}
+
+double NormalSampling(RNG_Seed Seed, double Mu, double Sigma)
+{
+    NormalParams Params = {.mu = Mu, .sigma = Sigma};
+
+    return RNG_MonteCarlo(Seed, &NormalPDF, &ExpPDF, &ExpSampling, &Params);
+}
+
+void NormalPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
+{
+    RNG_NormalPDF_ArrayM(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma, Array, Size);
+}
+
+void ExpPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
+{
+    double A = M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(0.5);
+    double B = 1 / ((NormalParams *)Params)->sigma;
+
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+        *List = A * exp(-B * (*x - ((NormalParams *)Params)->mu));
+}
+
+void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+    {
+        // Get uniform number
+        double Uniform = RNG_FastFloat(Seed);
+
+        double Sign = 1;
+
+        if (Uniform >= 0.5)
+        {
+            Sign = -1;
+            Uniform -= 0.5;
+        }
+
+        // Get from distribution
+        *List = ((NormalParams *)Params)->mu - Sign * ((NormalParams *)Params)->sigma * log(1 - 2 * Uniform);
+    }
+}
+
+double *NormalSampling_Array(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
+{
+    NormalParams Params = {.mu = Mu, .sigma = Sigma};
+
+    return RNG_MonteCarlo_Array(Seed, &NormalPDF_ArrayM, &ExpPDF_ArrayM, &ExpSampling_ArrayM, &Params, Size);
 }

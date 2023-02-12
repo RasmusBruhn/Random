@@ -24,7 +24,11 @@ enum _RNG_ErrorID
     _RNG_ERRORID_NORMALCDFARRAY_MALLOC = 0x700090200,
     _RNG_ERRORID_NORMALICDFARRAY_MALLOC = 0x7000A0200,
     _RNG_ERRORID_GENSEED_SEED = 0x7000B0200,
-    _RNG_ERRORID_CREATESEED_MALLOC = 0x7000C0200
+    _RNG_ERRORID_CREATESEED_MALLOC = 0x7000C0200,
+    _RNG_ERRORID_MONTECARLOARRAY_MALLOC = 0x7000D0200,
+    _RNG_ERRORID_MONTECARLOARRAYM_MALLOC = 0x7000E0200,
+    _RNG_ERRORID_MONTECARLOARRAYM_MALLOC2 = 0x7000E0201,
+    _RNG_ERRORID_MONTECARLOARRAYM_MALLOC3 = 0x7000E0202
 };
 
 #define _RNG_ERRORMES_MALLOC "Unable to allocate memory (Size: %lu)"
@@ -59,7 +63,7 @@ uint64_t *RNG_Int_Array(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size);
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void RNG_Int_ArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size);
 
@@ -80,7 +84,7 @@ double *RNG_Float_Array(RNG_Seed Seed, double Min, double Max, size_t Size);
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void RNG_Float_ArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size);
 
@@ -101,7 +105,7 @@ double *RNG_Exp_Array(RNG_Seed Seed, double x0, double l, size_t Size);
 // Seed: The seed to use and update, NULL to use global seed
 // x0: The minimu x possible
 // l: The length scale of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void RNG_Exp_ArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size);
 
@@ -122,7 +126,7 @@ double *RNG_ExpPDF_Array(double *x, double x0, double l, size_t Size);
 // x: The x-values to get the y-value for
 // x0: The minimu x possible
 // l: The length scale of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_ExpPDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
@@ -143,7 +147,7 @@ double *RNG_ExpCDF_Array(double *x, double x0, double l, size_t Size);
 // x: The x-values to get the y-value for
 // x0: The minimu x possible
 // l: The length scale of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_ExpCDF_ArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
@@ -164,7 +168,7 @@ double *RNG_ExpICDF_Array(double *y, double x0, double l, size_t Size);
 // x: The x-values to get the y-value for
 // x0: The minimu x possible
 // l: The length scale of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_ExpICDF_ArrayM(double *y, double x0, double l, double *Array, size_t Size);
 
@@ -185,7 +189,7 @@ double *RNG_Normal_Array(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
 // Seed: The seed to use and update, NULL to use global seed
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void RNG_Normal_ArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size);
 
@@ -206,7 +210,7 @@ double *RNG_NormalPDF_Array(double *x, double Mu, double Sigma, size_t Size);
 // x: The x-values to get the y-value for
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_NormalPDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
 
@@ -227,7 +231,7 @@ double *RNG_NormalCDF_Array(double *x, double Mu, double Sigma, size_t Size);
 // x: The x-values to get the y-value for
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_NormalCDF_ArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
 
@@ -248,7 +252,7 @@ double *RNG_NormalICDF_Array(double *y, double Mu, double Sigma, size_t Size);
 // x: The x-values to get the y-value for
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
-// Array The array to fill
+// Array: The array to fill
 // Size: The size of the array
 void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size);
 
@@ -256,7 +260,32 @@ void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, s
 
 // Binomial
 
-// Monte carlo
+// Samples from some distribution using Monte Carlo simulation
+// Seed: The seed to use and update, NULL to use global seed
+// PDF: The PDF function for the distribution to sample from, it does not need to be normalized, takes the arguments: x: The position to get the PDF, Params: A pointer to some type containing all parameters for the PDF
+// BoundingPDF: The PDF for the bounding function, it does not need to normalized but for all x: PDF(x) <=  BoundingPDF(x), takes the arguments: x: The position to get the PDF, Params: A pointer to some type containing all parameters for the PDF
+// BoundingSampler: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
+// Params: A pointer to some type containing all parameters for the PDFs
+double RNG_MonteCarlo(RNG_Seed Seed, double (*PDF)(double x, void *Params), double (*BoundingPDF)(double x, void *Params), double (*BoundingSampler)(RNG_Seed Seed, void *Params), void *Params);
+
+// Creates an array with samples from some distribution using Monte Carlo simulation
+// Seed: The seed to use and update, NULL to use global seed
+// PDF_ArrayM: The PDF function for the distribution to sample from, it does not need to be normalized, takes the arguments: x: The position array to get the PDF, Params: A pointer to some type containing all parameters for the PDF, Array: The array to fill, Size: The size of the array
+// BoundingPDF_ArrayM: The PDF for the bounding function, it does not need to normalized but for all x: PDF(x) <= BoundingPDF(x), takes the arguments: x: The position array to get the PDF, Params: A pointer to some type containing all parameters for the PDF, Array: The array to fill, Size: The size of the array
+// BoundingSampler_ArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler, Array: The array to fill, Size: The size of the array
+// Params: A pointer to some type containing all parameters for the PDFs
+// Size: The size of the array
+double *RNG_MonteCarlo_Array(RNG_Seed Seed, void (*PDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSampler_ArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, size_t Size);
+
+// Fills an array with samples from some distribution using Monte Carlo simulation
+// Seed: The seed to use and update, NULL to use global seed
+// PDF_ArrayM: The PDF function for the distribution to sample from, it does not need to be normalized, takes the arguments: x: The position array to get the PDF, Params: A pointer to some type containing all parameters for the PDF, Array: The array to fill, Size: The size of the array
+// BoundingPDF_ArrayM: The PDF for the bounding function, it does not need to normalized but for all x: PDF(x) <= BoundingPDF(x), takes the arguments: x: The position array to get the PDF, Params: A pointer to some type containing all parameters for the PDF, Array: The array to fill, Size: The size of the array
+// BoundingSampler_ArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler, Array: The array to fill, Size: The size of the array
+// Params: A pointer to some type containing all parameters for the PDFs
+// Size: The size of the array
+// Array: The array to fill
+void RNG_MonteCarlo_ArrayM(RNG_Seed Seed, void (*PDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSampler_ArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double *Array, size_t Size);
 
 // From libit
 double RNG_erfinv(double x);
@@ -265,6 +294,8 @@ double RNG_erfinv(double x);
 #define RNG_MAX 18446744073709551616.
 #define RNG_MULTIPLIER 6364136223846793005
 #define RNG_CONSTANT 1442695040888963407
+#define RNG_MONTECARLO_BUFFER 1.1
+#define RNG_MONTECARLO_MINSUCCESS 0.1
 
 // For inverse error function
 #define RNG_ERFINV_A3 -0.140543331
@@ -290,11 +321,11 @@ double RNG_erfinv(double x);
 uint64_t _RNG_GlobalSeed = 0;
 
 // Get a random uint32_t and update the seed to be that number
-// Seed (uint64_t): The seed to use and update
-#define RNG_FastInt(Seed) ((Seed) = (Seed) * RNG_MULTIPLIER + RNG_CONSTANT)
+// Seed (RNG_Seed): The seed to use and update
+#define RNG_FastInt(Seed) ((*Seed) = (*Seed) * RNG_MULTIPLIER + RNG_CONSTANT)
 
 // Get a random double between 0 inclusive and 1 exclusive and update seed
-// Seed (uint64_t): The seed to use and update
+// Seed (RNG_Seed): The seed to use and update
 #define RNG_FastFloat(Seed) ((double) RNG_FastInt(Seed) / RNG_MAX)
 
 RNG_Seed RNG_GenSeed()
@@ -340,7 +371,7 @@ uint64_t RNG_Int(uint64_t *Seed, uint64_t Min, uint64_t Max)
     if (Seed == NULL)
         Seed = &_RNG_GlobalSeed;
 
-    return Min + (RNG_FastInt(*Seed) % (1 + Max - Min));
+    return Min + (RNG_FastInt(Seed) % (1 + Max - Min));
 }
 
 uint64_t *RNG_Int_Array(uint64_t *Seed, uint64_t Min, uint64_t Max, size_t Size)
@@ -369,7 +400,7 @@ void RNG_Int_ArrayM(uint64_t *Seed, uint64_t Min, uint64_t Max, uint64_t *Array,
 
     // Fill memory
     for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
-        *List = Min + (RNG_FastInt(*Seed) % (1 + Max - Min));
+        *List = Min + (RNG_FastInt(Seed) % (1 + Max - Min));
 }
 
 double RNG_Float(uint64_t *Seed, double Min, double Max)
@@ -379,7 +410,7 @@ double RNG_Float(uint64_t *Seed, double Min, double Max)
     if (Seed == NULL)
         Seed = &_RNG_GlobalSeed;
 
-    return Min + RNG_FastFloat(*Seed) * (Max - Min);
+    return Min + RNG_FastFloat(Seed) * (Max - Min);
 }
 
 double *RNG_Float_Array(uint64_t *Seed, double Min, double Max, size_t Size)
@@ -409,7 +440,7 @@ void RNG_Float_ArrayM(uint64_t *Seed, double Min, double Max, double *Array, siz
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
-        *List = Min + RNG_FastFloat(*Seed) * (Max - Min);
+        *List = Min + RNG_FastFloat(Seed) * (Max - Min);
 }
 
 double RNG_Exp(uint64_t *Seed, double x0, double l)
@@ -421,7 +452,7 @@ double RNG_Exp(uint64_t *Seed, double x0, double l)
         Seed = &_RNG_GlobalSeed;
 
     // Get the number from the uniform distribution
-    double Uniform = RNG_FastFloat(*Seed);
+    double Uniform = RNG_FastFloat(Seed);
 
     // Get from current distribution
     return x0 - l * log(1 - Uniform);
@@ -456,7 +487,7 @@ void RNG_Exp_ArrayM(uint64_t *Seed, double x0, double l, double *Array, size_t S
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
     {
         // Get uniform number
-        double Uniform = RNG_FastFloat(*Seed);
+        double Uniform = RNG_FastFloat(Seed);
 
         // Get from distribution
         *List = x0 - l * log(1 - Uniform);
@@ -577,7 +608,7 @@ double RNG_Normal(uint64_t *Seed, double Mu, double Sigma)
         Seed = &_RNG_GlobalSeed;
 
     // Get the number from the uniform distribution
-    double Uniform = RNG_FastFloat(*Seed);
+    double Uniform = RNG_FastFloat(Seed);
 
     // Get from current distribution
     return Mu + A * RNG_erfinv(2 * Uniform - 1);
@@ -615,7 +646,7 @@ void RNG_Normal_ArrayM(uint64_t *Seed, double Mu, double Sigma, double *Array, s
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
     {
         // Get uniform number
-        double Uniform = RNG_FastFloat(*Seed);
+        double Uniform = RNG_FastFloat(Seed);
 
         // Get from distribution
         *List = Mu + A * RNG_erfinv(2 * Uniform - 1);
@@ -730,6 +761,137 @@ void *RNG_NormalICDF_ArrayM(double *y, double Mu, double Sigma, double *Array, s
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
         *List = Mu + A * RNG_erfinv(2 * *y - 1);
+}
+
+double RNG_MonteCarlo(RNG_Seed Seed, double (*PDF)(double x, void *Params), double (*BoundingPDF)(double x, void *Params), double (*BoundingSampler)(RNG_Seed Seed, void *Params), void *Params)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Loop until a value has been found
+    while (true)
+    {
+        // Get a random sample
+        double x = (*BoundingSampler)(Seed, Params);
+
+        // Get the success probability
+        double Prob = (*PDF)(x, Params) / (*BoundingPDF)(x, Params);
+
+        // Check to accept it
+        double Uniform = RNG_FastFloat(Seed);
+
+        if (Uniform < Prob)
+            return x;
+    }
+}
+
+double *RNG_MonteCarlo_Array(RNG_Seed Seed, void (*PDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSampler_ArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_MONTECARLOARRAY_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_MonteCarlo_ArrayM(Seed, PDF_ArrayM, BoundingPDF_ArrayM, BoundingSampler_ArrayM, Params, Array, Size);
+
+    return Array;
+}
+
+void RNG_MonteCarlo_ArrayM(RNG_Seed Seed, void (*PDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDF_ArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSampler_ArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double *Array, size_t Size)
+{
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Get memory
+    double *x = (double *)malloc(sizeof(double) * Size);
+
+    if (x == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_MONTECARLOARRAYM_MALLOC, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return;
+    }
+
+    double *PDF = (double *)malloc(sizeof(double) * Size);
+
+    if (PDF == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_MONTECARLOARRAYM_MALLOC2, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        free(x);
+        return;
+    }
+
+    double *BoundingPDF = (double *)malloc(sizeof(double) * Size);
+
+    if (BoundingPDF == NULL)
+    {
+        _RNG_SetError(_RNG_ERRORID_MONTECARLOARRAYM_MALLOC3, _RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        free(x);
+        free(PDF);
+        return;
+    }
+
+    // Set end point
+    double *ArrayEnd = Array + Size;
+    double SuccessRate = 1;
+
+    // Loop until done
+    while (true)
+    {
+        // Get x samples
+        size_t SampleCount = (size_t)((double)(ArrayEnd - Array) / SuccessRate * RNG_MONTECARLO_BUFFER);
+
+        if (SampleCount > Size)
+            SampleCount = Size;
+
+        BoundingSampler_ArrayM(Seed, Params, x, SampleCount);
+
+        // Get the PDF values
+        PDF_ArrayM(x, Params, PDF, SampleCount);
+        BoundingPDF_ArrayM(x, Params, BoundingPDF, SampleCount);
+
+        // Check if they are good
+        double *OldArray = Array;
+
+        for (double *xSample = x, *PDFSample = PDF, *BoundingPDFSample = BoundingPDF, *xSampleEnd = xSample + SampleCount; xSample < xSampleEnd; ++xSample, ++PDFSample, ++BoundingPDFSample)
+        {
+            // Get probability for success
+            double Prob = *PDFSample / *BoundingPDFSample;
+            double Uniform = RNG_FastFloat(Seed);
+
+            // Check if it should be kept
+            if (Uniform < Prob)
+            {
+                *(Array++) = *xSample;
+
+                // Check if it is done
+                if (Array >= ArrayEnd)
+                {
+                    free(x);
+                    free(PDF);
+                    free(BoundingPDF);
+
+                    return;
+                }
+            }
+        }
+
+        // Get the new success rate
+        SuccessRate = (double)(Array - OldArray) / (double)SampleCount;
+
+        if (SuccessRate < RNG_MONTECARLO_MINSUCCESS)
+            SuccessRate = RNG_MONTECARLO_MINSUCCESS;
+    }
 }
 
 // From libit
