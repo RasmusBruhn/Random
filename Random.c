@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "Random.h"
 #include <time.h>
+#include <math.h>
 
 typedef struct __NormalParams 
 {
@@ -85,7 +86,7 @@ int main(int argc, char **argv)
     printf("Exp PDF: %.3g, %.3g, %.3g\n", RNG_ExpPDF(0, 0, 1), RNG_ExpPDF(1, 0, 1), RNG_ExpPDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpPDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_ExpPDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp PDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -94,7 +95,7 @@ int main(int argc, char **argv)
     printf("Exp CDF: %.3g, %.3g, %.3g\n", RNG_ExpCDF(0, 0, 1), RNG_ExpCDF(1, 0, 1), RNG_ExpCDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpCDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_ExpCDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp CDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -103,7 +104,7 @@ int main(int argc, char **argv)
     printf("Exp ICDF: %.3g, %.3g, %.3g\n", RNG_ExpICDF(0, 0, 1), RNG_ExpICDF(0.4, 0, 1), RNG_ExpICDF(0.8, 0, 1));
 
     xFloat = linspace(0, 1, Bins);
-    FloatArray = RNG_ExpICDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_ExpICDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp ICDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -122,7 +123,7 @@ int main(int argc, char **argv)
     printf("Normal PDF: %.3g, %.3g, %.3g\n", RNG_NormalPDF(-1, 0, 1), RNG_NormalPDF(0, 0, 1), RNG_NormalPDF(1, 0, 1));
 
     xFloat = linspace(-3, 3, Bins);
-    FloatArray = RNG_NormalPDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_NormalPDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal PDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -131,7 +132,7 @@ int main(int argc, char **argv)
     printf("Normal CDF: %.3g, %.3g, %.3g\n", RNG_NormalCDF(-1, 0, 1), RNG_NormalCDF(0, 0, 1), RNG_NormalCDF(1, 0, 1));
 
     xFloat = linspace(-3, 3, Bins);
-    FloatArray = RNG_NormalCDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_NormalCDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal CDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
     printf("Normal ICDF: %.3g, %.3g, %.3g\n", RNG_NormalICDF(0.1, 0, 1), RNG_NormalICDF(0.5, 0, 1), RNG_NormalICDF(0.9, 0, 1));
 
     xFloat = linspace(0, 1, Bins);
-    FloatArray = RNG_NormalICDF_Array(xFloat, 0, 1, Size);
+    FloatArray = RNG_NormalICDF_Array(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal ICDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -165,7 +166,12 @@ int main(int argc, char **argv)
     free(FloatArray);
     free(Hist);
 
-    
+    xFloat = linspace(-3, 3, Bins);
+    ExpPDF_ArrayM(xFloat, &Params, xFloat, Bins);
+    PrintFloatArray("Double exp PDF distribution", xFloat, Bins);
+
+    free(xFloat);
+    free(FloatArray);
 
     RNG_DestroySeed(Seed);
 
@@ -278,7 +284,7 @@ double NormalPDF(double x, void *Params)
 
 double ExpPDF(double x, void *Params)
 {
-    return M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(-abs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
+    return M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(-fabs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
 }
 
 double ExpSampling(RNG_Seed Seed, void *Params)
@@ -318,11 +324,11 @@ void NormalPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
 
 void ExpPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
 {
-    double A = M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(0.5);
+    double A = 1 / (((NormalParams *)Params)->sigma * sqrt(2 * M_PI)) * exp(0.5);
     double B = 1 / ((NormalParams *)Params)->sigma;
 
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
-        *List = A * exp(-B * (*x - ((NormalParams *)Params)->mu));
+        *List = A * exp(-fabs(B * (*x - ((NormalParams *)Params)->mu)));
 }
 
 void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
@@ -339,16 +345,16 @@ void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
         // Get uniform number
         double Uniform = RNG_FastFloat(Seed);
 
-        double Sign = 1;
+        double Sign = ((NormalParams *)Params)->sigma;
 
         if (Uniform >= 0.5)
         {
-            Sign = -1;
+            Sign *= -1;
             Uniform -= 0.5;
         }
 
         // Get from distribution
-        *List = ((NormalParams *)Params)->mu - Sign * ((NormalParams *)Params)->sigma * log(1 - 2 * Uniform);
+        *List = ((NormalParams *)Params)->mu - Sign * log(1 - 2 * Uniform);
     }
 }
 
