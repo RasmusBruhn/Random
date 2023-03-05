@@ -30,13 +30,13 @@ double ExpSampling(RNG_Seed Seed, void *Params);
 
 double NormalSampling(RNG_Seed Seed, double Mu, double Sigma);
 
-void NormalPDF_ArrayM(double *x, void *Params, double *Array, size_t Size);
+void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size);
 
-void ExpPDF_ArrayM(double *x, void *Params, double *Array, size_t Size);
+void ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size);
 
-void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size);
+void ExpSamplingArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size);
 
-double *NormalSampling_Array(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
+double *NormalSamplingArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
 
 // Test Random.h
 int main(int argc, char **argv)
@@ -50,13 +50,13 @@ int main(int argc, char **argv)
     uint64_t *xInt = NULL;
 
     // Generate seed
-    RNG_Seed Seed = RNG_GenSeed();
+    RNG_Seed Seed = RNG_SeedGenerate();
     printf("Seed: %lu\n", *Seed);
 
     // Generate uniform ints
     printf("Uniform ints: %lu, %lu, %lu\n", RNG_Int(Seed, 0, Bins - 1), RNG_Int(Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
 
-    IntArray = RNG_Int_Array(Seed, 0, Bins - 1, Size);
+    IntArray = RNG_IntArray(Seed, 0, Bins - 1, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
     PrintFloatArray("Uniform int distribution", Hist, Bins);
 
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     // Generate uniform floats
     printf("Uniform floats: %.3g, %.3g, %.3g\n", RNG_Float(Seed, 0, 1), RNG_Float(Seed, 0, 1), RNG_Float(NULL, 0, 1));
 
-    FloatArray = RNG_Float_Array(Seed, 0, 1, Size);
+    FloatArray = RNG_FloatArray(Seed, 0, 1, Size);
     Hist = HistFloat(0, 1, Bins, FloatArray, Size);
     PrintFloatArray("Uniform float distribution", Hist, Bins);
 
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     // Generate exp
     printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(Seed, 0, 1), RNG_Exp(Seed, 0, 1), RNG_Exp(NULL, 0, 1));
 
-    FloatArray = RNG_Exp_Array(Seed, 0, 1, Size);
+    FloatArray = RNG_ExpArray(Seed, 0, 1, Size);
     Hist = HistFloat(0, 5, Bins, FloatArray, Size);
     PrintFloatArray("Exp distribution", Hist, Bins);
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     printf("Exp PDF: %.3g, %.3g, %.3g\n", RNG_ExpPDF(0, 0, 1), RNG_ExpPDF(1, 0, 1), RNG_ExpPDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpPDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_ExpPDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp PDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     printf("Exp CDF: %.3g, %.3g, %.3g\n", RNG_ExpCDF(0, 0, 1), RNG_ExpCDF(1, 0, 1), RNG_ExpCDF(2, 0, 1));
 
     xFloat = linspace(0, 5, Bins);
-    FloatArray = RNG_ExpCDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_ExpCDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp CDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     printf("Exp ICDF: %.3g, %.3g, %.3g\n", RNG_ExpICDF(0, 0, 1), RNG_ExpICDF(0.4, 0, 1), RNG_ExpICDF(0.8, 0, 1));
 
     xFloat = linspace(0, 1, Bins);
-    FloatArray = RNG_ExpICDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_ExpICDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Exp ICDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     // Generate normal
     printf("Normal: %.3g, %.3g, %.3g\n", RNG_Normal(Seed, 0, 1), RNG_Normal(Seed, 0, 1), RNG_Normal(NULL, 0, 1));
 
-    FloatArray = RNG_Normal_Array(Seed, 0, 1, Size);
+    FloatArray = RNG_NormalArray(Seed, 0, 1, Size);
     Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
     PrintFloatArray("Normal distribution", Hist, Bins);
 
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
     printf("Normal PDF: %.3g, %.3g, %.3g\n", RNG_NormalPDF(-1, 0, 1), RNG_NormalPDF(0, 0, 1), RNG_NormalPDF(1, 0, 1));
 
     xFloat = linspace(-3, 3, Bins);
-    FloatArray = RNG_NormalPDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_NormalPDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal PDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     printf("Normal CDF: %.3g, %.3g, %.3g\n", RNG_NormalCDF(-1, 0, 1), RNG_NormalCDF(0, 0, 1), RNG_NormalCDF(1, 0, 1));
 
     xFloat = linspace(-3, 3, Bins);
-    FloatArray = RNG_NormalCDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_NormalCDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal CDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     printf("Normal ICDF: %.3g, %.3g, %.3g\n", RNG_NormalICDF(0.1, 0, 1), RNG_NormalICDF(0.5, 0, 1), RNG_NormalICDF(0.9, 0, 1));
 
     xFloat = linspace(0, 1, Bins);
-    FloatArray = RNG_NormalICDF_Array(xFloat, 0, 1, Bins);
+    FloatArray = RNG_NormalICDFArray(xFloat, 0, 1, Bins);
     PrintFloatArray("Normal ICDF distribution", FloatArray, Bins);
 
     free(xFloat);
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
     // Generate normal using monte carlo
     printf("Normal: %.3g, %.3g, %.3g\n", NormalSampling(Seed, 0, 1), NormalSampling(Seed, 0, 1), NormalSampling(NULL, 0, 1));
 
-    FloatArray = NormalSampling_Array(Seed, 0, 1, Size);
+    FloatArray = NormalSamplingArray(Seed, 0, 1, Size);
     Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
     PrintFloatArray("Normal distribution", Hist, Bins);
 
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 
     NormalParams Params = {.mu = 0, .sigma = 1};
     FloatArray = malloc(sizeof(double) * Size);
-    ExpSampling_ArrayM(Seed, &Params, FloatArray, Size);
+    ExpSamplingArrayM(Seed, &Params, FloatArray, Size);
     Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
     PrintFloatArray("Double exp distribution", Hist, Bins);
 
@@ -167,13 +167,12 @@ int main(int argc, char **argv)
     free(Hist);
 
     xFloat = linspace(-3, 3, Bins);
-    ExpPDF_ArrayM(xFloat, &Params, xFloat, Bins);
+    ExpPDFArrayM(xFloat, &Params, xFloat, Bins);
     PrintFloatArray("Double exp PDF distribution", xFloat, Bins);
 
     free(xFloat);
-    free(FloatArray);
 
-    RNG_DestroySeed(Seed);
+    RNG_SeedDestroy(Seed);
 
     return 0;
 }
@@ -284,7 +283,7 @@ double NormalPDF(double x, void *Params)
 
 double ExpPDF(double x, void *Params)
 {
-    return M_2_SQRTPI / (((NormalParams *)Params)->sigma * 2 * M_SQRT2) * exp(-fabs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
+    return 1 / (((NormalParams *)Params)->sigma * _RNG_SQRTPI * _RNG_SQRT2) * exp(-fabs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
 }
 
 double ExpSampling(RNG_Seed Seed, void *Params)
@@ -296,7 +295,7 @@ double ExpSampling(RNG_Seed Seed, void *Params)
         Seed = &_RNG_GlobalSeed;
 
     // Get the number from the uniform distribution
-    double Uniform = RNG_FastFloat(Seed);
+    double Uniform = RNG_FloatFast(Seed);
 
     double Sign = 1;
 
@@ -317,21 +316,21 @@ double NormalSampling(RNG_Seed Seed, double Mu, double Sigma)
     return RNG_MonteCarlo(Seed, &NormalPDF, &ExpPDF, &ExpSampling, &Params);
 }
 
-void NormalPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
+void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 {
-    RNG_NormalPDF_ArrayM(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma, Array, Size);
+    RNG_NormalPDFArrayM(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma, Array, Size);
 }
 
-void ExpPDF_ArrayM(double *x, void *Params, double *Array, size_t Size)
+void ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 {
-    double A = 1 / (((NormalParams *)Params)->sigma * sqrt(2 * M_PI)) * exp(0.5);
+    double A = 1 / (((NormalParams *)Params)->sigma * sqrt(2 * 3.141592653589793)) * exp(0.5);
     double B = 1 / ((NormalParams *)Params)->sigma;
 
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = A * exp(-fabs(B * (*x - ((NormalParams *)Params)->mu)));
 }
 
-void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
+void ExpSamplingArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -343,7 +342,7 @@ void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
     {
         // Get uniform number
-        double Uniform = RNG_FastFloat(Seed);
+        double Uniform = RNG_FloatFast(Seed);
 
         double Sign = ((NormalParams *)Params)->sigma;
 
@@ -358,9 +357,9 @@ void ExpSampling_ArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
     }
 }
 
-double *NormalSampling_Array(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
+double *NormalSamplingArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 
-    return RNG_MonteCarlo_Array(Seed, &NormalPDF_ArrayM, &ExpPDF_ArrayM, &ExpSampling_ArrayM, &Params, Size);
+    return RNG_MonteCarloArray(Seed, &NormalPDFArrayM, &ExpPDFArrayM, &ExpSamplingArrayM, &Params, Size);
 }
