@@ -317,7 +317,7 @@ double NormalSampling(RNG_Seed Seed, double Mu, double Sigma)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 
-    return RNG_MonteCarlo(Seed, &NormalPDF, &ExpPDF, &ExpSampling, &Params);
+    return RNG_MonteCarlo(Seed, &NormalPDF, &ExpPDF, &ExpSampling, &Params, 1);
 }
 
 void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)
@@ -365,5 +365,5 @@ double *NormalSamplingArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 
-    return RNG_MonteCarloArray(Seed, &NormalPDFArrayM, &ExpPDFArrayM, &ExpSamplingArrayM, &Params, Size);
+    return RNG_MonteCarloArray(Seed, &NormalPDFArrayM, &ExpPDFArrayM, &ExpSamplingArrayM, &Params, 1, Size);
 }
