@@ -1,8 +1,9 @@
+#include <Debug2.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "Random.h"
 #include <time.h>
 #include <math.h>
+#include "Random.h"
 
 typedef struct __NormalParams 
 {
@@ -148,11 +149,11 @@ int main(int argc, char **argv)
     free(FloatArray);
 
     // Generate normal using monte carlo
-    printf("Normal: %.3g, %.3g, %.3g\n", NormalSampling(Seed, 0, 1), NormalSampling(Seed, 0, 1), NormalSampling(NULL, 0, 1));
+    printf("Monte Carlo Normal: %.3g, %.3g, %.3g\n", NormalSampling(Seed, 0, 1), NormalSampling(Seed, 0, 1), NormalSampling(NULL, 0, 1));
 
     FloatArray = NormalSamplingArray(Seed, 0, 1, Size);
     Hist = HistFloat(-3, 3, Bins, FloatArray, Size);
-    PrintFloatArray("Normal distribution", Hist, Bins);
+    PrintFloatArray("Monte Carlo Normal distribution", Hist, Bins);
 
     free(FloatArray);
     free(Hist);
@@ -173,6 +174,9 @@ int main(int argc, char **argv)
     free(xFloat);
 
     RNG_SeedDestroy(Seed);
+
+    printf("\n");
+    DBG_MemoryPrint();
 
     return 0;
 }
@@ -323,7 +327,7 @@ void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 
 void ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 {
-    double A = 1 / (((NormalParams *)Params)->sigma * sqrt(2 * 3.141592653589793)) * exp(0.5);
+    double A = 1 / (((NormalParams *)Params)->sigma * _RNG_SQRTPI * _RNG_SQRT2) * exp(0.5);
     double B = 1 / ((NormalParams *)Params)->sigma;
 
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
