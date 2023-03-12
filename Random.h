@@ -290,7 +290,7 @@ double *_RNG_PoissonPMFArray(uint64_t *n, void *Params, size_t Size);
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+void _RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Fills an array of random numbers from the poisson bounding distribution
 // Seed: The seed to use and update, NULL to use global seed
@@ -304,7 +304,7 @@ void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Ar
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Binomial
 
@@ -315,7 +315,7 @@ double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, 
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
+double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -402,6 +402,8 @@ double _RNG_erfinv(double x);
 // Constants
 #define _RNG_SQRT2 1.4142135623730951
 #define _RNG_SQRTPI 1.7724538509055159
+#define _RNG_1_E 0.36787944117144233
+#define _RNG_E 2.718281828459045
 
 uint64_t _RNG_GlobalSeed = 0;
 
@@ -844,7 +846,19 @@ uint64_t RNG_Poisson(RNG_Seed Seed, double Lambda)
 
 uint64_t *RNG_PoissonArray(RNG_Seed Seed, double Lambda, size_t Size)
 {
-    return RNG_MonteCarloUIntArray(Seed, &_RNG_PoissonPMFArrayM, &_RNG_PoissonBoundingPMFArrayM, &_RNG_PoissonBoundingSamplerArrayM, &Lambda, 1, Size);
+    // Get memory
+    uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(uint64_t) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_PoissonArrayM(Seed, Lambda, Array, Size);
+
+    return Array;
 }
 
 void RNG_PoissonArrayM(RNG_Seed Seed, double Lambda, uint64_t *Array, size_t Size)
@@ -880,6 +894,13 @@ double *RNG_PoissonPMFArray(uint64_t *n, double Lambda, size_t Size)
 
 double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t Size)
 {
+    _RNG_PoissonPMFArrayM(n, &Lambda, Array, Size);
+}
+
+void _RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+{
+    double Lambda = *(double *)Params;
+
     // Calculate constants
     double lLambda = log(Lambda);
 
@@ -888,22 +909,108 @@ double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t S
         *List = exp(lLambda * (double)(*n) - Lambda - lgamma((double)(*n) + 1));
 }
 
-double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
-{
-
-}
-
 void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size)
 {
+    // Unpack params
+    double Lambda = *(double *)Params;
 
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
+
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // If lambda is too small
+    if (Lambda < 1)
+    {
+        for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+        {
+            // Get uniform number
+            double Uniform = RNG_FloatFast(Seed);
+
+            // Get from distribution
+            *List = (uint64_t)(- log(1 - Uniform));
+        }
+
+        return;
+    }
+
+    // Calulate constants
+    double LogLambda = log(Lambda);
+    double SqrtLambda = sqrt(Lambda);
+    double nm = ceil(Lambda * exp(-1 / SqrtLambda)) - 1;
+    double np = ceil(Lambda * exp(1 / SqrtLambda)) - 1;
+    double A = exp(LogLambda * (nm - 0.5) - Lambda - (nm - Lambda) / SqrtLambda - lgamma(nm + 1)) / (exp(1 / SqrtLambda) - 1);
+    double B = exp(LogLambda * (np - 0.5) - Lambda + (np - Lambda) / SqrtLambda - lgamma(np + 1)) / (1 - exp(-1 / SqrtLambda));
+    double PA = A * (1 - exp(-SqrtLambda)) / (B + A * (1 - exp(-SqrtLambda)));
+    double AmpA = (1 - exp(-SqrtLambda));
+
+    // Fill memory
+    for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+    {
+        // Get uniform number
+        double Uniform = RNG_FloatFast(Seed);
+
+        // It is part of the first exp
+        if (Uniform < PA)
+        {
+            Uniform /= PA;
+            *List = (uint64_t)(Lambda + SqrtLambda * log(1 - AmpA * Uniform));
+        }
+
+        // It is part of the second exp
+        else
+        {
+            Uniform = (Uniform - PA) / (1 - PA);
+            *List = (uint64_t)(Lambda - SqrtLambda * log(1 - Uniform));
+        }
+    }
 }
 
-double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
 {
+    // Unpack params
+    double Lambda = *(double *)Params;
 
+    // If lambda is too small
+    if (Lambda < 1)
+    {
+        double Amp = 0.5 * _RNG_E;
+
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+            *List = Amp * exp(-(double)(*n));
+
+        return;
+    }
+
+    // Calulate constants
+    double LogLambda = log(Lambda);
+    double SqrtLambda = sqrt(Lambda);
+    double Std = 1 / SqrtLambda;
+    double nm = ceil(Lambda * exp(-1 / SqrtLambda)) - 1;
+    double np = ceil(Lambda * exp(1 / SqrtLambda)) - 1;
+    double AmpA = exp(LogLambda * nm - Lambda - (nm - Lambda) / SqrtLambda - lgamma(nm + 1));
+    double AmpB = exp(LogLambda * np - Lambda + (np - Lambda) / SqrtLambda - lgamma(np + 1));
+
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+    {
+        uint64_t nThreshold = (uint64_t)floor(Lambda);
+
+        // The first exp
+        if (*n < nThreshold)
+            *List = AmpA * exp(Std * ((double)(*n) - Lambda));
+
+        // The second exp
+        else if (*n > nThreshold)
+            *List = AmpB * exp(-Std * ((double)(*n) - Lambda));
+
+        // At the threshold
+        else
+            *List = AmpA * (1 - exp(Std * ((double)nThreshold - Lambda))) / (exp(Std) - 1) + AmpB * (1 - exp(-Std * ((double)nThreshold + 1 - Lambda))) / (1 - exp(-Std));
+    }
 }
 
-double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier)
+double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier)
 {
     double Value;
 

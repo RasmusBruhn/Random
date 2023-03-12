@@ -173,6 +173,43 @@ int main(int argc, char **argv)
 
     free(xFloat);
 
+    // Generate Poisson
+    printf("Poisson Large: %lu, %lu, %lu\n", RNG_Poisson(Seed, 20), RNG_Poisson(Seed, 20), RNG_Poisson(NULL, 20));
+
+    IntArray = RNG_PoissonArray(Seed, 20, Size);
+    Hist = HistInt(20 - (Bins - 1) / 2, 20 + (Bins - 1) / 2, Bins, IntArray, Size);
+    PrintFloatArray("Poisson Large distribution", Hist, Bins);
+
+    free(IntArray);
+    free(Hist);
+
+    printf("Poisson Large PMF: %.3g, %.3g, %.3g\n", RNG_PoissonPMF(15, 20), RNG_PoissonPMF(20, 20), RNG_PoissonPMF(25, 20));
+
+    xInt = arange(20 - (Bins - 1) / 2, 1, Bins);
+    FloatArray = RNG_PoissonPMFArray(xInt, 20, Bins);
+    PrintFloatArray("Poisson Large PMF distribution", FloatArray, Bins);
+
+    free(xInt);
+    free(FloatArray);
+
+    printf("Poisson Small: %lu, %lu, %lu\n", RNG_Poisson(Seed, 0.5), RNG_Poisson(Seed, 0.5), RNG_Poisson(NULL, 0.5));
+
+    IntArray = RNG_PoissonArray(Seed, 0.5, Size);
+    Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
+    PrintFloatArray("Poisson Small distribution", Hist, Bins);
+
+    free(IntArray);
+    free(Hist);
+
+    printf("Poisson Small PMF: %.3g, %.3g, %.3g\n", RNG_PoissonPMF(0, 0.5), RNG_PoissonPMF(1, 0.5), RNG_PoissonPMF(2, 0.5));
+
+    xInt = arange(0, 1, Bins);
+    FloatArray = RNG_PoissonPMFArray(xInt, 0.5, Bins);
+    PrintFloatArray("Poisson Small PMF distribution", FloatArray, Bins);
+
+    free(xInt);
+    free(FloatArray);
+
     RNG_SeedDestroy(Seed);
 
     printf("\n");
@@ -317,7 +354,7 @@ double NormalSampling(RNG_Seed Seed, double Mu, double Sigma)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 
-    return RNG_MonteCarlo(Seed, &NormalPDF, &ExpPDF, &ExpSampling, &Params, 1);
+    return RNG_MonteCarlo(Seed, &NormalPDFArrayM, &ExpPDFArrayM, &ExpSamplingArrayM, &Params, 1);
 }
 
 void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)

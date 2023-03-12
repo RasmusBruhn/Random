@@ -14,8 +14,9 @@ def P(n, lam, mu, a, b):
     A = a * lam ** n_m * np.exp(-(lam + a * (n_m - mu))) / (sp.gamma(n_m + 1) * (np.exp(a) - 1))
     B = b * lam ** n_p * np.exp(-(lam - b * (n_p - mu))) / (sp.gamma(n_p + 1) * (1 - np.exp(-b)))
 
-    if lam < 1:
-        return B / b * np.exp(-b * (n - mu)) * (1 - np.exp(-b))
+    if lam <= 1:
+        C = np.exp(1) / 2
+        return C * np.exp(- n)
         
     Result = np.empty_like(n, dtype = float)
     F_m = n <= np.floor(mu) - 1
@@ -34,7 +35,7 @@ def I(Params, lam):
     B = b * lam ** n_p * np.exp(-(lam - b * (n_p - mu))) / (sp.gamma(n_p + 1) * (1 - np.exp(-b)))
     return A / a * (1 - np.exp(-mu * a)) + B / b
 
-lam = 10
+lam = 0.01
 mu = lam
 a = 1 / np.sqrt(lam)
 b = 1 / np.sqrt(lam)
@@ -43,7 +44,7 @@ x = np.arange(np.ceil(3 * lam) + 2)
 fig, ax = plt.subplots()
 ax.bar(x, f(x, lam), width = 1, fill = False, edgecolor = "red")
 ax.bar(x, P(x, lam, mu, a, b), width = 1, fill = False, edgecolor = "green")
-
+"""
 a_list = np.linspace(0.5 / np.sqrt(lam), 2 / np.sqrt(lam), 1000)
 b_list = np.linspace(0.5 / np.sqrt(lam), 2 / np.sqrt(lam), 1000)
 mu_list = np.linspace(0, 2 * lam, 1000)
@@ -72,7 +73,7 @@ print(f"b = {np.sqrt(lam) * b_list[np.argmin(b_values)]}")
 fig, ax = plt.subplots()
 ax.plot(mu_list, mu_values)
 print(f"mu = {mu_list[np.argmin(mu_values)] / lam}")
-
+""""""
 lam_list = np.linspace(1, 100, 100)
 lam_mu_values = np.empty_like(lam_list)
 lam_a_values = np.empty_like(lam_list)
@@ -98,3 +99,4 @@ ax.plot(lam_list, lam_b_values)
 
 fig, ax = plt.subplots()
 ax.plot(lam_list, lam_mu_values)
+"""
