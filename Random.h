@@ -17,6 +17,13 @@
 #define _RNG_ERRORMES_CREATESEED "Unable to create seed"
 
 typedef uint64_t* RNG_Seed;
+typedef struct ___RNG_BinomialParams _RNG_BinomialParams;
+
+struct ___RNG_BinomialParams
+{
+    uint64_t N;
+    double p;
+};
 
 // Generates a seed, the sed must be destroyed when no longer used
 RNG_Seed RNG_SeedGenerate();
@@ -274,17 +281,6 @@ double *RNG_PoissonPMFArray(uint64_t *n, double Lambda, size_t Size);
 // Size: The size of the array
 double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t Size);
 
-// Get the PMF for a poisson distribution using params (lambda ** n * exp(lambda) / n!)
-// n: The position to get the PMF for
-// Params: The parameters
-double _RNG_PoissonPMF(uint64_t n, void *Params);
-
-// Get an array of PMF values for the poisson distribution using params (lambda ** n * exp(lambda) / n!)
-// n: The positions to get the PMF for
-// Params: The parameters
-// Size: The size of the array
-double *_RNG_PoissonPMFArray(uint64_t *n, void *Params, size_t Size);
-
 // Fills an array of PMF values for the poisson distribution using params (lambda ** n * exp(lambda) / n!)
 // n: The positions to get the PMF for
 // Params: The parameters
@@ -306,7 +302,68 @@ void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Ar
 // Size: The size of the array
 void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
-// Binomial
+// Get a random number from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// Seed: The seed to use and update, NULL to use global seed
+// N: The number of events to draw
+// p: The probability that an event is a success
+uint64_t RNG_Binomial(RNG_Seed Seed, uint64_t N, double p);
+
+// Get an array of random numbers from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// Seed: The seed to use and update, NULL to use global seed
+// N: The number of events to draw
+// p: The probability that an event is a success
+// Size: The size of the array
+uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size);
+
+// Fills an array of random numbers from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// Seed: The seed to use and update, NULL to use global seed
+// N: The number of events to draw
+// p: The probability that an event is a success
+// Array: The array to fill
+// Size: The size of the array
+void RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size);
+
+// Get the PMF for a binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// n: The position to get the PMF for
+// N: The number of events to draw
+// p: The probability that an event is a success
+double RNG_BinomialPMF(uint64_t n, uint64_t N, double p);
+
+// Get an array of PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// n: The positions to get the PMF for
+// N: The number of events to draw
+// p: The probability that an event is a success
+// Size: The size of the array
+double *RNG_BinomialPMFArray(uint64_t *n, uint64_t N, double p, size_t Size);
+
+// Fills an array of PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// n: The positions to get the PMF for
+// N: The number of events to draw
+// p: The probability that an event is a success
+// Array: The array to fill
+// Size: The size of the array
+double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, size_t Size);
+
+// Fills an array of PMF values for the binomial distribution using params (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// n: The positions to get the PMF for
+// Params: The parameters
+// Array: The array to fill
+// Size: The size of the array
+void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+
+// Fills an array of random numbers from the binomial bounding distribution
+// Seed: The seed to use and update, NULL to use global seed
+// Params: The parameters
+// Array: The array to fill
+// Size: The size of the array
+void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
+
+// Fills an array of bounding PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
+// n: The positions to get the PMF for
+// Params: The parameters
+// Array: The array to fill
+// Size: The size of the array
+void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -971,6 +1028,136 @@ void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, siz
 {
     // Unpack params
     double Lambda = *(double *)Params;
+
+    // If lambda is too small
+    if (Lambda < 1)
+    {
+        double Amp = 0.5 * _RNG_E;
+
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+            *List = Amp * exp(-(double)(*n));
+
+        return;
+    }
+
+    // Calulate constants
+    double LogLambda = log(Lambda);
+    double SqrtLambda = sqrt(Lambda);
+    double Std = 1 / SqrtLambda;
+    double nm = ceil(Lambda * exp(-1 / SqrtLambda)) - 1;
+    double np = ceil(Lambda * exp(1 / SqrtLambda)) - 1;
+    double AmpA = exp(LogLambda * nm - Lambda - (nm - Lambda) / SqrtLambda - lgamma(nm + 1));
+    double AmpB = exp(LogLambda * np - Lambda + (np - Lambda) / SqrtLambda - lgamma(np + 1));
+
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+    {
+        uint64_t nThreshold = (uint64_t)floor(Lambda);
+
+        // The first exp
+        if (*n < nThreshold)
+            *List = AmpA * exp(Std * ((double)(*n) - Lambda));
+
+        // The second exp
+        else if (*n > nThreshold)
+            *List = AmpB * exp(-Std * ((double)(*n) - Lambda));
+
+        // At the threshold
+        else
+            *List = AmpA * (1 - exp(Std * ((double)nThreshold - Lambda))) / (exp(Std) - 1) + AmpB * (1 - exp(-Std * ((double)nThreshold + 1 - Lambda))) / (1 - exp(-Std));
+    }
+}
+
+uint64_t RNG_Binomial(RNG_Seed Seed, uint64_t N, double p)
+{
+    uint64_t Value;
+
+    RNG_BinomialArrayM(Seed, N, p, &Value, 1);
+
+    return Value;
+}
+
+uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size)
+{
+    // Get memory
+    uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(uint64_t) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_BinomialArrayM(Seed, N, p, Array, Size);
+
+    return Array;
+}
+
+void RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size)
+{
+    _RNG_BinomialParams Params = {.N = N, .p = p};
+
+    return RNG_MonteCarloUIntArrayM(Seed, &_RNG_BinomialPMFArrayM, &_RNG_BinomialBoundingPMFArrayM, &_RNG_BinomialBoundingSamplerArrayM, &Params, 1, Array, Size);
+}
+
+double RNG_BinomialPMF(uint64_t n, uint64_t N, double p)
+{
+    double Value;
+
+    RNG_BinomialPMFArrayM(&n, N, p, &Value, 1);
+
+    return Value;
+}
+
+double *RNG_BinomialPMFArray(uint64_t *n, uint64_t N, double p, size_t Size)
+{
+    // Get memory
+    double *Array = (double *)malloc(sizeof(double) * Size);
+
+    if (Array == NULL)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
+        return NULL;
+    }
+
+    // Get numbers
+    RNG_BinomialPMFArrayM(n, N, p, Array, Size);
+
+    return Array;
+}
+
+double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, size_t Size)
+{
+    _RNG_BinomialParams Params = {.N = N, .p = p};
+
+    _RNG_BinomialPMFArrayM(n, &Params, Array, Size);
+}
+
+void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+{
+    double N = (double)((_RNG_BinomialParams *)Params)->N;
+    double p = ((_RNG_BinomialParams *)Params)->p;
+
+    // Calculate constants
+    double lgammaN = lgamma(N + 1);
+    double logP = log(p);
+    double logQ = log(1 - p);
+
+    // Fill memory
+    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+        *List = exp(lgammaN - lgamma((double)(*n) + 1) - lgamma(N - (double)(*n) + 1) + (double)(*n) * logP + (N - (double)(*n)) * logQ);
+}
+
+void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size)
+{
+
+}
+
+void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+{
+    // Unpack params
+    double N = (double)((_RNG_BinomialParams *)Params)->N;
+    double p = ((_RNG_BinomialParams *)Params)->p;
 
     // If lambda is too small
     if (Lambda < 1)

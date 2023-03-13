@@ -66,11 +66,11 @@ def Iuse(N, p):
         return I((1 / (np.sqrt(N * p * (1 - p)) - np.log(p)), 1 / (np.sqrt(N * p * (1 - p)) - np.log(1 - p))), N, p, N * p)
 
 N = 10
-p = 0.9999999999999999
+p = 0.99
 mu = N * p
 a = 1 / (np.sqrt(N * p * (1 - p)) - np.log(p))
 b = 1 / (np.sqrt(N * p * (1 - p)) - np.log(1 - p))
-x = np.arange(0, N, 1)
+x = np.arange(0, N + 1, 1)
 
 fValues = f(x, N, p)
 PValues = Puse(x, N, p)
