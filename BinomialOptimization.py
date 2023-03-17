@@ -31,14 +31,43 @@ def P(n, N, p, mu, a, b):
     return Result
 
 def Puse(n, N, p):
-    if N * p < 1:
-        return P(n, N, p, 1, 1 / (np.sqrt(1 - 1 / N) - np.log(1 / N)), 1 / (np.sqrt(1 - 1 / N) - np.log(1 - 1 / N)))
+    State = 0
+    pOld = p
     
-    if N * p > N - 1:
-        return P(n, N, p, N - 1, 1 / (np.sqrt(1 - 1 / N) - np.log(1 - 1 / N)), 1 / (np.sqrt(1 - 1 / N) - np.log(1 / N)))
+    if N * p < 0.5:
+        State = 1
+        p = 1 / (2 * N)
+        
+    elif N * p > N - 0.5:
+        State = 2
+        p = 1 - 1 / (2 * N)
     
-    else:
-        return P(n, N, p, N * p, 1 / (np.sqrt(N * p * (1 - p)) - np.log(p)), 1 / (np.sqrt(N * p * (1 - p)) - np.log(1 - p)))
+    mu = N * p + 0.5
+    a = b = 1 / np.sqrt(N * p * (1 - p))
+    
+    n_m = np.ceil((N * pOld - np.exp(a) * (1 - pOld)) / (p + np.exp(a) * (1 - pOld)))
+    n_p = np.ceil((N * pOld - np.exp(-b) * (1 - pOld)) / (p + np.exp(-b) * (1 - pOld)))
+    A = a * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_m + 1) - sp.loggamma(N - n_m + 1) - a * (n_m - mu) + np.log(pOld) * n_m + np.log(1 - pOld) * (N - n_m)) / (np.exp(a) - 1)
+    B = b * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_p + 1) - sp.loggamma(N - n_p + 1) + b * (n_p - mu) + np.log(pOld) * n_p + np.log(1 - pOld) * (N - n_p)) / (1 - np.exp(-b))
+
+    Result = np.empty_like(n, dtype = float)    
+
+    if State == 1:
+        Mask = (n == 0)
+        Result[Mask] = (1 - pOld) ** N
+        Result[~Mask] = B / b * np.exp(-b * (n[~Mask] - mu)) * (1 - np.exp(-b))
+        return Result
+    
+    elif State == 2:
+        return A / a * np.exp(a * (n - mu)) * (np.exp(a) - 1)
+
+    F_m = n < np.floor(mu)
+    F_p = n > np.floor(mu)
+    F_l = (~F_m & ~F_p)
+    Result[F_m] = A / a * np.exp(a * (n[F_m] - mu)) * (np.exp(a) - 1)
+    Result[F_p] = B / b * np.exp(-b * (n[F_p] - mu)) * (1 - np.exp(-b))
+    Result[F_l] = A / a * (1 - np.exp(a * (n[F_l] - mu))) + B / b * (1 - np.exp(-b * (n[F_l] + 1 - mu)))
+    return Result
 
 def I(Params, N, p, mu):
     a, b = Params
@@ -47,8 +76,8 @@ def I(Params, N, p, mu):
     A = a * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_m + 1) - sp.loggamma(N - n_m + 1) - a * (n_m - mu) + np.log(p) * n_m + np.log(1 - p) * (N - n_m)) / (np.exp(a) - 1)
     B = b * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_p + 1) - sp.loggamma(N - n_p + 1) + b * (n_p - mu) + np.log(p) * n_p + np.log(1 - p) * (N - n_p)) / (1 - np.exp(-b))
     
-    if N * p < 1:
-        return B / b * np.exp(b * mu) * (1 - np.exp(-b * (N + 1)))
+    if N * p < 0.5:
+        return B / b * np.exp(b) * (1 - np.exp(-b * (N + 1)))
     
     if N * p > N - 1:
         return A / a * (np.exp(a * (N + 1 - mu)) - np.exp(-a * mu))
@@ -56,17 +85,35 @@ def I(Params, N, p, mu):
     return A / a * (1 - np.exp(-mu * a)) + B / b * (1 - np.exp(-b * (N + 1 - mu)))
 
 def Iuse(N, p):
-    if N * p < 1:
-        return I((1 / (np.sqrt(1 - 1 / N) - np.log(1 / N)), 1 / (np.sqrt(1 - 1 / N) - np.log(1 - 1 / N))), N, p, 1)
+    State = 0
+    pOld = p
     
-    if N * p > N - 1:
-        return I((1 / (np.sqrt(1 - 1 / N) - np.log(1 - 1 / N)), 1 / (np.sqrt(1 - 1 / N) - np.log(1 / N))), N, p, N - 1)
+    if N * p < 0.5:
+        State = 1
+        p = 1 / (2 * N)
+        
+    elif N * p > N - 0.5:
+        State = 2
+        p = 1 - 1 / (2 * N)
     
-    else:
-        return I((1 / (np.sqrt(N * p * (1 - p)) - np.log(p)), 1 / (np.sqrt(N * p * (1 - p)) - np.log(1 - p))), N, p, N * p)
+    mu = N * p + 0.5
+    a = b = 1 / np.sqrt(N * p * (1 - p))
+    
+    n_m = np.ceil((N * pOld - np.exp(a) * (1 - pOld)) / (pOld + np.exp(a) * (1 - pOld)))
+    n_p = np.ceil((N * pOld - np.exp(-b) * (1 - pOld)) / (pOld + np.exp(-b) * (1 - pOld)))
+    A = a * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_m + 1) - sp.loggamma(N - n_m + 1) - a * (n_m - mu) + np.log(pOld) * n_m + np.log(1 - pOld) * (N - n_m)) / (np.exp(a) - 1)
+    B = b * np.exp(sp.loggamma(N + 1) - sp.loggamma(n_p + 1) - sp.loggamma(N - n_p + 1) + b * (n_p - mu) + np.log(pOld) * n_p + np.log(1 - pOld) * (N - n_p)) / (1 - np.exp(-b))
+    
+    if State == 1:
+        return B / b * (1 - np.exp(-b * N)) + (1 - pOld) ** N
+    
+    if State == 2:
+        return A / a * (np.exp(a * (N + 1 - mu)) - np.exp(-a * mu))
+    
+    return A / a * (1 - np.exp(-mu * a)) + B / b * (1 - np.exp(-b * (N + 1 - mu)))
 
 N = 10
-p = 0.99
+p = 0.5
 mu = N * p
 a = 1 / (np.sqrt(N * p * (1 - p)) - np.log(p))
 b = 1 / (np.sqrt(N * p * (1 - p)) - np.log(1 - p))
@@ -78,6 +125,7 @@ PValues = Puse(x, N, p)
 fig, ax = plt.subplots()
 ax.bar(x, fValues, width = 1, fill = False, edgecolor = "red")
 ax.bar(x, PValues, width = 1, fill = False, edgecolor = "green")
+
 print(f"I = {Iuse(N, p)}")
 
 Mask = fValues > PValues
@@ -104,28 +152,28 @@ fig, ax = plt.subplots()
 ax.plot(b_list * Std, b_values)
 print(f"b = {Std * b_list[np.argmin(b_values)]}")
 """
-"""
-p_list = np.linspace(0.001, 0.999, 100)
+
+p_list = np.linspace(0.5 / N, 0.5, 100)
 p_a_values = np.empty_like(p_list)
 p_b_values = np.empty_like(p_list)
 p_I_values = np.empty_like(p_list)
 p_I0_values = np.empty_like(p_list)
 
 for i, pt in enumerate(p_list):
-    Std1 = np.sqrt(N * pt * (1 - pt)) - np.log(pt) 
-    Std2 = np.sqrt(N * pt * (1 - pt)) - np.log(1 - pt)
-    Result = opt.minimize(I, [1 / Std1, 1 / Std2], args = (N, pt, N * pt))#, bounds = ((0.1 / Std1, 10 / Std1), (0.1 / Std2, 10 / Std2)))
-    p_a_values[i], p_b_values[i] = Result.x * np.array([Std1, Std2])
-    p_I_values[i] = Result.fun
-    p_I0_values[i] = I((1 / Std1, 1 / Std2), N, pt, N * pt)
+    Std1 = np.sqrt(N * pt * (1 - pt)) 
+    Std2 = np.sqrt(N * pt * (1 - pt))
+    #Result = opt.minimize(I, [1 / Std1, 1 / Std2], args = (N, pt, N * pt))#, bounds = ((0.1 / Std1, 10 / Std1), (0.1 / Std2, 10 / Std2)))
+    #p_a_values[i], p_b_values[i] = Result.x * np.array([Std1, Std2])
+    #p_I_values[i] = Result.fun
+    p_I0_values[i] = I((1 / Std1, 1 / Std2), N, pt, N * pt + 0.5)
     
 fig, ax = plt.subplots()
-ax.plot(p_list, p_I_values)
+#ax.plot(p_list, p_I_values)
 ax.plot(p_list, p_I0_values)
 
-fig, ax = plt.subplots()
-ax.plot(p_list, p_a_values)
+#fig, ax = plt.subplots()
+#ax.plot(p_list, p_a_values)
 
-fig, ax = plt.subplots()
-ax.plot(p_list, p_b_values)
-"""
+#fig, ax = plt.subplots()
+#ax.plot(p_list, p_b_values)
+

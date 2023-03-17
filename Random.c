@@ -210,6 +210,60 @@ int main(int argc, char **argv)
     free(xInt);
     free(FloatArray);
 
+    printf("Binomial Normal: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.5));
+
+    IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.3, Size);
+    Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
+    PrintFloatArray("Binomial Normal distribution", Hist, Bins);
+
+    free(IntArray);
+    free(Hist);
+
+    printf("Binomial Normal PMF: %.3g, %.3g, %.3g\n", RNG_BinomialPMF(0, Bins - 1, 0.5), RNG_BinomialPMF((Bins - 1) / 2, Bins - 1, 0.5), RNG_BinomialPMF(Bins - 1, Bins - 1, 0.5));
+
+    xInt = arange(0, 1, Bins);
+    FloatArray = RNG_BinomialPMFArray(xInt, Bins - 1, 0.3, Bins);
+    PrintFloatArray("Binomial Normal PMF distribution", FloatArray, Bins);
+
+    free(xInt);
+    free(FloatArray);
+
+    printf("Binomial Small: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.02), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.02));
+
+    IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.02, Size);
+    Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
+    PrintFloatArray("Binomial Small distribution", Hist, Bins);
+
+    free(IntArray);
+    free(Hist);
+
+    printf("Binomial Small PMF: %.3g, %.3g, %.3g\n", RNG_BinomialPMF(0, Bins - 1, 0.02), RNG_BinomialPMF((Bins - 1) / 2, Bins - 1, 0.02), RNG_BinomialPMF(Bins - 1, Bins - 1, 0.02));
+
+    xInt = arange(0, 1, Bins);
+    FloatArray = RNG_BinomialPMFArray(xInt, Bins - 1, 0.02, Bins);
+    PrintFloatArray("Binomial Small PMF distribution", FloatArray, Bins);
+
+    free(xInt);
+    free(FloatArray);
+
+    printf("Binomial Large: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(NULL, Bins - 1, 0.98));
+
+    IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.98, Size);
+    Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
+    PrintFloatArray("Binomial Large distribution", Hist, Bins);
+
+    free(IntArray);
+    free(Hist);
+
+    printf("Binomial Large PMF: %.3g, %.3g, %.3g\n", RNG_BinomialPMF(0, Bins - 1, 0.98), RNG_BinomialPMF((Bins - 1) / 2, Bins - 1, 0.98), RNG_BinomialPMF(Bins - 1, Bins - 1, 0.98));
+
+    xInt = arange(0, 1, Bins);
+    FloatArray = RNG_BinomialPMFArray(xInt, Bins - 1, 0.98, Bins);
+    PrintFloatArray("Binomial Large PMF distribution", FloatArray, Bins);
+
+    free(xInt);
+    free(FloatArray);
+
     RNG_SeedDestroy(Seed);
 
     printf("\n");

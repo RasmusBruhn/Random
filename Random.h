@@ -15,6 +15,13 @@
 
 #define _RNG_ERRORMES_MALLOC "Unable to allocate memory (Size: %lu)"
 #define _RNG_ERRORMES_CREATESEED "Unable to create seed"
+#define _RNG_ERRORMES_GENERATE "Unable to generate random %s"
+#define _RNG_ERRORMES_PDF "Unable to generate PDF for %s"
+#define _RNG_ERRORMES_CDF "Unable to generate CDF for %s"
+#define _RNG_ERRORMES_ICDF "Unable to generate ICDF for %s"
+#define _RNG_ERRORMES_LARGERTHAN "The value of %s must not be smaller than %s but received (%lu, %lu)"
+#define _RNG_ERRORMES_LARGERTHANF "The value of %s must not be smaller than %s but received (%g, %g)"
+#define _RNG_ERRORMES_NOTNEGATIVE "The value of %s must not be negative, but received %g"
 
 typedef uint64_t* RNG_Seed;
 typedef struct ___RNG_BinomialParams _RNG_BinomialParams;
@@ -54,7 +61,7 @@ uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size);
 // Max: The maximum value
 // Array: The array to fill
 // Size: The size of the array
-void RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size);
+uint64_t *RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size);
 
 // Get a uniform random float
 // Seed: The seed to use and update, NULL to use global seed
@@ -75,7 +82,7 @@ double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size);
 // Max: The maximum value
 // Array: The array to fill
 // Size: The size of the array
-void RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size);
+double *RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size);
 
 // Get a random number from an exponential distibution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
@@ -96,7 +103,7 @@ double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size);
 // l: The length scale of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size);
+double *RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size);
 
 // Get the PDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
@@ -117,7 +124,7 @@ double *RNG_ExpPDFArray(double *x, double x0, double l, size_t Size);
 // l: The length scale of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_ExpPDFArrayM(double *x, double x0, double l, double *Array, size_t Size);
+double *RNG_ExpPDFArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
 // Get the CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
@@ -138,7 +145,7 @@ double *RNG_ExpCDFArray(double *x, double x0, double l, size_t Size);
 // l: The length scale of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_ExpCDFArrayM(double *x, double x0, double l, double *Array, size_t Size);
+double *RNG_ExpCDFArrayM(double *x, double x0, double l, double *Array, size_t Size);
 
 // Get the inverse CDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
@@ -159,7 +166,7 @@ double *RNG_ExpICDFArray(double *y, double x0, double l, size_t Size);
 // l: The length scale of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t Size);
+double *RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t Size);
 
 // Get a random number from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // Seed: The seed to use and update, NULL to use global seed
@@ -180,7 +187,7 @@ double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
 // Sigma: The standard deviation of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size);
+double *RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size);
 
 // Get the PDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // x: The x-value to get the y-value for
@@ -201,7 +208,7 @@ double *RNG_NormalPDFArray(double *x, double Mu, double Sigma, size_t Size);
 // Sigma: The standard deviation of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_NormalPDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
+double *RNG_NormalPDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
 
 // Get the CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // x: The x-value to get the y-value for
@@ -222,7 +229,7 @@ double *RNG_NormalCDFArray(double *x, double Mu, double Sigma, size_t Size);
 // Sigma: The standard deviation of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_NormalCDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
+double *RNG_NormalCDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size);
 
 // Get the inverse CDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // x: The x-value to get the y-value for
@@ -243,7 +250,7 @@ double *RNG_NormalICDFArray(double *y, double Mu, double Sigma, size_t Size);
 // Sigma: The standard deviation of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size);
+double *RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size);
 
 // Get a random number from the poisson distribution (lambda ** n * exp(lambda) / n!)
 // Seed: The seed to use and update, NULL to use global seed
@@ -261,7 +268,7 @@ uint64_t *RNG_PoissonArray(RNG_Seed Seed, double Lambda, size_t Size);
 // Lambda: The mean value of the distribution
 // Array: The array to fill
 // Size: The size of the array
-void RNG_PoissonArrayM(RNG_Seed Seed, double Lambda, uint64_t *Array, size_t Size);
+uint64_t *RNG_PoissonArrayM(RNG_Seed Seed, double Lambda, uint64_t *Array, size_t Size);
 
 // Get the PMF for a poisson distribution (lambda ** n * exp(lambda) / n!)
 // n: The position to get the PMF for
@@ -286,21 +293,21 @@ double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t S
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Fills an array of random numbers from the poisson bounding distribution
 // Seed: The seed to use and update, NULL to use global seed
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the poisson distribution (lambda ** n * exp(lambda) / n!)
 // n: The positions to get the PMF for
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Get a random number from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // Seed: The seed to use and update, NULL to use global seed
@@ -321,7 +328,7 @@ uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size);
 // p: The probability that an event is a success
 // Array: The array to fill
 // Size: The size of the array
-void RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size);
+uint64_t *RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size);
 
 // Get the PMF for a binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // n: The position to get the PMF for
@@ -349,21 +356,21 @@ double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, 
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Fills an array of random numbers from the binomial bounding distribution
 // Seed: The seed to use and update, NULL to use global seed
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // n: The positions to get the PMF for
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -372,7 +379,7 @@ void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, si
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
+double RNG_MonteCarlo(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -382,7 +389,7 @@ double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, 
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-double *RNG_MonteCarloArray(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+double *RNG_MonteCarloArray(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -393,7 +400,7 @@ double *RNG_MonteCarloArray(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Pa
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size);
+double *RNG_MonteCarloArrayM(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -402,7 +409,7 @@ void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Para
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier);
+uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -412,7 +419,7 @@ uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -423,7 +430,7 @@ uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, 
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
+uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
 
 // From libit
 double _RNG_erfinv(double x);
@@ -512,7 +519,11 @@ uint64_t RNG_Int(RNG_Seed Seed, uint64_t Min, uint64_t Max)
 {
     uint64_t Value;
 
-    RNG_IntArrayM(Seed, Min, Max, &Value, 1);
+    if (RNG_IntArrayM(Seed, Min, Max, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "int");
+        return -1;
+    }
 
     return Value;
 }
@@ -528,12 +539,17 @@ uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size)
         return NULL;
     }
 
-    RNG_IntArrayM(Seed, Min, Max, Array, Size);
+    if (RNG_IntArrayM(Seed, Min, Max, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "int");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size)
+uint64_t *RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -541,16 +557,29 @@ void RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, s
     if (Seed == NULL)
         Seed = &_RNG_GlobalSeed;
 
+    // Make sure max is not small than min
+    if (Max < Min)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_LARGERTHAN, "Max", "Min", Max, Min);
+        return NULL;
+    }
+
     // Fill memory
     for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
         *List = Min + (RNG_IntFast(Seed) % (1 + Max - Min));
+
+    return Array;
 }
 
 double RNG_Float(RNG_Seed Seed, double Min, double Max)
 {
     double Value;
 
-    RNG_FloatArrayM(Seed, Min, Max, &Value, 1);
+    if (RNG_FloatArrayM(Seed, Min, Max, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "float");
+        return NAN;
+    }
 
     return Value;
 }
@@ -567,12 +596,17 @@ double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size)
     }
 
     // Get numbers
-    RNG_FloatArrayM(Seed, Min, Max, Array, Size);
+    if (RNG_FloatArrayM(Seed, Min, Max, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "float");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size)
+double *RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -580,16 +614,28 @@ void RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_
     if (Seed == NULL)
         Seed = &_RNG_GlobalSeed;
 
+    if (Max < Min)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_LARGERTHANF, "Max", "Min", Max, Min);
+        return NULL;
+    }
+
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
         *List = Min + RNG_FloatFast(Seed) * (Max - Min);
+
+    return Array;
 }
 
 double RNG_Exp(RNG_Seed Seed, double x0, double l)
 {
     double Value;
 
-    RNG_ExpArrayM(Seed, x0, l, &Value, 1);
+    if (RNG_ExpArrayM(Seed, x0, l, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "exp");
+        return NAN;
+    }
 
     return Value;
 }
@@ -606,18 +652,29 @@ double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpArrayM(Seed, x0, l, Array, Size);
+    if (RNG_ExpArrayM(Seed, x0, l, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "exp");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size)
+double *RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
 
     if (Seed == NULL)
         Seed = &_RNG_GlobalSeed;
+
+    if (l < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "l", l);
+        return NULL;
+    }
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
@@ -628,13 +685,19 @@ void RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Siz
         // Get from distribution
         *List = x0 - l * log(1 - Uniform);
     }
+
+    return Array;
 }
 
 double RNG_ExpPDF(double x, double x0, double l)
 {
     double Value;
 
-    RNG_ExpPDFArrayM(&x, x0, l, &Value, 1);
+    if (RNG_ExpPDFArrayM(&x, x0, l, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PDF, "exp");
+        return NAN;
+    }
 
     return Value;
 }
@@ -651,26 +714,51 @@ double *RNG_ExpPDFArray(double *x, double x0, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpPDFArrayM(x, x0, l, Array, Size);
+    if (RNG_ExpPDFArrayM(x, x0, l, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PDF, "exp");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_ExpPDFArrayM(double *x, double x0, double l, double *Array, size_t Size)
+double *RNG_ExpPDFArrayM(double *x, double x0, double l, double *Array, size_t Size)
 {
+    if (l < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "l", l);
+        return NULL;
+    }
+
+    if (l == 0)
+    {
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+            *List = ((*x == x0) ? (INFINITY) : (0));
+
+        return Array;
+    }
+
     // Calculate constants
     double c = 1 / l;
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = ((*x < x0) ? (0) : (c * exp(-c * (*x - x0))));
+
+    return Array;
 }
 
 double RNG_ExpCDF(double x, double x0, double l)
 {
     double Value;
 
-    RNG_ExpCDFArrayM(&x, x0, l, &Value, 1);
+    if (RNG_ExpCDFArrayM(&x, x0, l, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_CDF, "exp");
+        return NAN;
+    }
 
     return Value;
 }
@@ -687,26 +775,51 @@ double *RNG_ExpCDFArray(double *x, double x0, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpCDFArrayM(x, x0, l, Array, Size);
+    if (RNG_ExpCDFArrayM(x, x0, l, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_CDF, "exp");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_ExpCDFArrayM(double *x, double x0, double l, double *Array, size_t Size)
+double *RNG_ExpCDFArrayM(double *x, double x0, double l, double *Array, size_t Size)
 {
+    if (l < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "l", l);
+        return NULL;
+    }
+
+    if (l == 0)
+    {
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+            *List = ((*x < x0) ? (0) : (1));
+
+        return Array;
+    }
+
     // Calculate constants
     double c = 1 / l;
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = ((*x < x0) ? (0) : (1 - exp(-c * (*x - x0))));
+
+    return Array;
 }
 
 double RNG_ExpICDF(double y, double x0, double l)
 {
     double Value;
 
-    RNG_ExpICDFArrayM(&y, x0, l, &Value, 1);
+    if (RNG_ExpICDFArrayM(&y, x0, l, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_ICDF, "exp");
+        return NAN;
+    }
 
     return Value;
 }
@@ -723,23 +836,40 @@ double *RNG_ExpICDFArray(double *y, double x0, double l, size_t Size)
     }
 
     // Get numbers
-    RNG_ExpICDFArrayM(y, x0, l, Array, Size);
+    if (RNG_ExpICDFArrayM(y, x0, l, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_ICDF, "exp");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t Size)
+double *RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t Size)
 {
+    if (l < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "l", l);
+        return NULL;
+    }
+
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
-        *List = x0 - l * log(1 - *y);
+        *List = ((*y < 0) ? (0) : ((*y >= 1) ? (INFINITY) : (x0 - l * log(1 - *y))));
+
+    return Array;
 }
 
 double RNG_Normal(RNG_Seed Seed, double Mu, double Sigma)
 {
     double Value;
 
-    RNG_NormalArrayM(Seed, Mu, Sigma, &Value, 1);
+    if (RNG_NormalArrayM(Seed, Mu, Sigma, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "normal");
+        return NAN;
+    }
 
     return Value;
 }
@@ -756,13 +886,24 @@ double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_NormalArrayM(Seed, Mu, Sigma, Array, Size);
+    if (RNG_NormalArrayM(Seed, Mu, Sigma, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "normal");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size)
+double *RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size)
 {
+    if (Sigma < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Sigma", Sigma);
+        return NULL;
+    }
+
     // Calulate constants
     double A = _RNG_SQRT2 * Sigma;
 
@@ -781,13 +922,19 @@ void RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, siz
         // Get from distribution
         *List = Mu + A * _RNG_erfinv(2 * Uniform - 1);
     }
+
+    return Array;
 }
 
 double RNG_NormalPDF(double x, double Mu, double Sigma)
 {
     double Value;
 
-    RNG_NormalPDFArrayM(&x, Mu, Sigma, &Value, 1);
+    if (RNG_NormalPDFArrayM(&x, Mu, Sigma, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PDF, "normal");
+        return NAN;
+    }
 
     return Value;
 }
@@ -804,13 +951,32 @@ double *RNG_NormalPDFArray(double *x, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_NormalPDFArrayM(x, Mu, Sigma, Array, Size);
+    if (RNG_NormalPDFArrayM(x, Mu, Sigma, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PDF, "normal");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_NormalPDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
+double *RNG_NormalPDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
 {
+    if (Sigma < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Sigma", Sigma);
+        return NULL;
+    }
+
+    if (Sigma == 0)
+    {
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+            *List = ((*x == Mu) ? (INFINITY) : (0));
+
+        return Array;
+    }
+
     // Calculate constants
     double A = 1 / (Sigma * _RNG_SQRTPI * _RNG_SQRT2);
     double B = 0.5 / (Sigma * Sigma);
@@ -818,13 +984,19 @@ void RNG_NormalPDFArrayM(double *x, double Mu, double Sigma, double *Array, size
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = A * exp(-B * (*x - Mu) * (*x - Mu));
+
+    return Array;
 }
 
 double RNG_NormalCDF(double x, double Mu, double Sigma)
 {
     double Value;
 
-    RNG_NormalCDFArrayM(&x, Mu, Sigma, &Value, 1);
+    if (RNG_NormalCDFArrayM(&x, Mu, Sigma, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_CDF, "normal");
+        return NAN;
+    }
 
     return Value;
 }
@@ -841,26 +1013,51 @@ double *RNG_NormalCDFArray(double *x, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_NormalCDFArrayM(x, Mu, Sigma, Array, Size);
+    if (RNG_NormalCDFArrayM(x, Mu, Sigma, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_CDF, "normal");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_NormalCDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
+double *RNG_NormalCDFArrayM(double *x, double Mu, double Sigma, double *Array, size_t Size)
 {
+    if (Sigma < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Sigma", Sigma);
+        return NULL;
+    }
+
+    if (Sigma == 0)
+    {
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
+            *List = ((*x < Mu) ? (0) : (1));
+
+        return Array;
+    }
+
     // Calculate constants
     double A = 1 / (_RNG_SQRT2 * Sigma);
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = 0.5 * (1 + erf(A * (*x - Mu)));
+
+    return Array;
 }
 
 double RNG_NormalICDF(double y, double Mu, double Sigma)
 {
     double Value;
 
-    RNG_NormalICDFArrayM(&y, Mu, Sigma, &Value, 1);
+    if (RNG_NormalICDFArrayM(&y, Mu, Sigma, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_ICDF, "normal");
+        return NAN;
+    }
 
     return Value;
 }
@@ -877,19 +1074,32 @@ double *RNG_NormalICDFArray(double *y, double Mu, double Sigma, size_t Size)
     }
 
     // Get numbers
-    RNG_NormalICDFArrayM(y, Mu, Sigma, Array, Size);
+    if (RNG_NormalICDFArrayM(y, Mu, Sigma, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_ICDF, "normal");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size)
+double *RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, size_t Size)
 {
+    if (Sigma < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Sigma", Sigma);
+        return NULL;
+    }
+
     // Calculate constants
     double A = 2 * Sigma;
  
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
-        *List = Mu + A * _RNG_erfinv(2 * *y - 1);
+        *List = ((*y < 0) ? (-INFINITY) : ((*y >= 1) ? (INFINITY) : (Mu + A * _RNG_erfinv(2 * *y - 1))));
+
+    return Array;
 }
 
 uint64_t RNG_Poisson(RNG_Seed Seed, double Lambda)
@@ -1051,7 +1261,7 @@ void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, siz
 
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
     {
-        uint64_t nThreshold = (uint64_t)floor(Lambda);
+        uint64_t nThreshold = (uint64_t)Lambda;
 
         // The first exp
         if (*n < nThreshold)
@@ -1150,7 +1360,113 @@ void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Siz
 
 void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size)
 {
+    // Get the global seed
+    extern uint64_t _RNG_GlobalSeed;
 
+    if (Seed == NULL)
+        Seed = &_RNG_GlobalSeed;
+
+    // Unpack params
+    double N = (double)((_RNG_BinomialParams *)Params)->N;
+    double p = ((_RNG_BinomialParams *)Params)->p;
+
+    // For low p
+    if (N * p < 0.5)
+    {
+        double DecayRate = 1 / sqrt((1 - 1 / (2 * N)) / 2);
+        double DecayLength = 1 / DecayRate;
+        double mu = 1;
+        double np = ceil((N * p - exp(-DecayRate) * (1 - p)) / (p + exp(-DecayRate) * (1 - p)));
+        double IntB = exp(lgamma(N + 1) - lgamma(np + 1) - lgamma(N - np + 1) + DecayRate * (np - mu) + log(p) * np + log(1 - p) * (N - np)) * (1 - exp(-DecayRate * (N + 1 - mu))) / (1 - exp(-DecayRate));
+        double LIntB = 1 - exp(-DecayRate * (N + 1 - mu));
+        double P0 = exp(log(1 - p) * N);
+        double PB = IntB / (P0 + IntB);
+
+        // Fill memory
+        for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+        {
+            // Get uniform number
+            double Uniform = RNG_FloatFast(Seed);
+
+            // It is part of the exp
+            if (Uniform < PB)
+            {
+                Uniform /= PB;
+                *List = (uint64_t)(mu - DecayLength * log(1 - LIntB * Uniform));
+            }
+
+            // It is 0
+            else
+                *List = 0;
+        }
+    }
+
+    // For high p
+    else if (N * p > N - 0.5)
+    {
+        double DecayRate = 1 / sqrt((1 - 1 / (2 * N)) / 2);
+        double DecayLength = 1 / DecayRate;
+        double mu = N;
+        double nm = ceil((N * p - exp(DecayRate) * (1 - p)) / (p + exp(DecayRate) * (1 - p)));
+        double IntA = exp(lgamma(N + 1) - lgamma(nm + 1) - lgamma(N - nm + 1) - DecayRate * (nm - mu) + log(p) * nm + log(1 - p) * (N - nm)) * (1 - exp(-DecayRate * mu)) / (exp(DecayRate) - 1);
+        double LIntA = 1 - exp(-DecayRate * mu);
+        double P0 = exp(log(p) * N);
+        double PA = IntA / (P0 + IntA);
+
+        // Fill memory
+        for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+        {
+            // Get uniform number
+            double Uniform = RNG_FloatFast(Seed);
+
+            // It is part of the exp
+            if (Uniform < PA)
+            {
+                Uniform /= PA;
+                *List = (uint64_t)(mu + DecayLength * log(1 - LIntA * Uniform));
+            }
+
+            // It is N
+            else
+                *List = N;
+        }
+    }
+
+    // For normal values of p
+    else
+    {
+        double DecayRate = 1 / sqrt(N * p * (1 - p));
+        double DecayLength = 1 / DecayRate;
+        double mu = N * p + 0.5;
+        double nm = ceil((N * p - exp(DecayRate) * (1 - p)) / (p + exp(DecayRate) * (1 - p)));
+        double np = ceil((N * p - exp(-DecayRate) * (1 - p)) / (p + exp(-DecayRate) * (1 - p)));
+        double IntA = exp(lgamma(N + 1) - lgamma(nm + 1) - lgamma(N - nm + 1) - DecayRate * (nm - mu) + log(p) * nm + log(1 - p) * (N - nm)) * (1 - exp(-DecayRate * mu)) / (exp(DecayRate) - 1);
+        double IntB = exp(lgamma(N + 1) - lgamma(np + 1) - lgamma(N - np + 1) + DecayRate * (np - mu) + log(p) * np + log(1 - p) * (N - np)) * (1 - exp(-DecayRate * (N + 1 - mu))) / (1 - exp(-DecayRate));
+        double LIntA = 1 - exp(-DecayRate * mu);
+        double LIntB = 1 - exp(-DecayRate * (N + 1 - mu));
+        double PA = IntA / (IntA + IntB);
+
+        // Fill memory
+        for (uint64_t *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+        {
+            // Get uniform number
+            double Uniform = RNG_FloatFast(Seed);
+
+            // It is part of the first exp
+            if (Uniform < PA)
+            {
+                Uniform /= PA;
+                *List = (uint64_t)(mu + DecayLength * log(1 - LIntA * Uniform));
+            }
+
+            // It is part of the second exp
+            else
+            {
+                Uniform = (Uniform - PA) / (1 - PA);
+                *List = (uint64_t)(mu - DecayLength * log(1 - LIntB * Uniform));
+            }
+        }
+    }
 }
 
 void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
@@ -1159,41 +1475,69 @@ void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, si
     double N = (double)((_RNG_BinomialParams *)Params)->N;
     double p = ((_RNG_BinomialParams *)Params)->p;
 
-    // If lambda is too small
-    if (Lambda < 1)
+    // It is small p
+    if (N * p < 0.5)
     {
-        double Amp = 0.5 * _RNG_E;
+        double DecayRate = 1 / sqrt((1 - 1 / (2 * N)) / 2);
+        double mu = 1;
+        double np = ceil((N * p - exp(-DecayRate) * (1 - p)) / (p + exp(-DecayRate) * (1 - p)));
+        double AmpB = exp(lgamma(N + 1) - lgamma(np + 1) - lgamma(N - np + 1) + DecayRate * (np - mu) + log(p) * np + log(1 - p) * (N - np));
+        double P0 = exp(log(1 - p) * N);
 
         for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
-            *List = Amp * exp(-(double)(*n));
+        {
+            if (*n == 0)
+                *List = P0;
 
-        return;
+            else
+                *List = AmpB * exp(-DecayRate * ((double)(*n) - mu));
+        }
     }
 
-    // Calulate constants
-    double LogLambda = log(Lambda);
-    double SqrtLambda = sqrt(Lambda);
-    double Std = 1 / SqrtLambda;
-    double nm = ceil(Lambda * exp(-1 / SqrtLambda)) - 1;
-    double np = ceil(Lambda * exp(1 / SqrtLambda)) - 1;
-    double AmpA = exp(LogLambda * nm - Lambda - (nm - Lambda) / SqrtLambda - lgamma(nm + 1));
-    double AmpB = exp(LogLambda * np - Lambda + (np - Lambda) / SqrtLambda - lgamma(np + 1));
-
-    for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+    // For large p
+    else if (N * p > N - 0.5)
     {
-        uint64_t nThreshold = (uint64_t)floor(Lambda);
+        double DecayRate = 1 / sqrt((1 - 1 / (2 * N)) / 2);
+        double mu = N;
+        double nm = ceil((N * p - exp(DecayRate) * (1 - p)) / (p + exp(DecayRate) * (1 - p)));
+        double AmpA = exp(lgamma(N + 1) - lgamma(nm + 1) - lgamma(N - nm + 1) - DecayRate * (nm - mu) + log(p) * nm + log(1 - p) * (N - nm));
+        double P0 = exp(log(p) * N);
 
-        // The first exp
-        if (*n < nThreshold)
-            *List = AmpA * exp(Std * ((double)(*n) - Lambda));
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+        {
+            if (*n == N)
+                *List = P0;
 
-        // The second exp
-        else if (*n > nThreshold)
-            *List = AmpB * exp(-Std * ((double)(*n) - Lambda));
+            else
+                *List = AmpA * exp(DecayRate * ((double)(*n) - mu));
+        }
+    }
 
-        // At the threshold
-        else
-            *List = AmpA * (1 - exp(Std * ((double)nThreshold - Lambda))) / (exp(Std) - 1) + AmpB * (1 - exp(-Std * ((double)nThreshold + 1 - Lambda))) / (1 - exp(-Std));
+    // Normal values for p
+    else
+    {
+        double DecayRate = 1 / sqrt(N * p * (1 - p));
+        double mu = N * p + 0.5;
+        double nm = ceil((N * p - exp(DecayRate) * (1 - p)) / (p + exp(DecayRate) * (1 - p)));
+        double np = ceil((N * p - exp(-DecayRate) * (1 - p)) / (p + exp(-DecayRate) * (1 - p)));
+        double AmpA = exp(lgamma(N + 1) - lgamma(nm + 1) - lgamma(N - nm + 1) - DecayRate * (nm - mu) + log(p) * nm + log(1 - p) * (N - nm));
+        double AmpB = exp(lgamma(N + 1) - lgamma(np + 1) - lgamma(N - np + 1) + DecayRate * (np - mu) + log(p) * np + log(1 - p) * (N - np));
+        double ModA = AmpA / (exp(DecayRate) - 1);
+        double ModB = AmpB / (1 - exp(-DecayRate));
+        uint64_t muFloor = (uint64_t)floor(mu);
+        double muLeft = mu - (double)muFloor;
+
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
+        {
+            if (*n < muFloor)
+                *List = AmpA * exp(DecayRate * ((double)(*n) - mu));
+
+            else if (*n > muFloor)
+                *List = AmpB * exp(-DecayRate * ((double)(*n) - mu));
+
+            else
+                *List = ModA * (1 - exp(-DecayRate * muLeft)) + ModB * (1 - exp(-DecayRate * (1 - muLeft)));
+        }
     }
 }
 
