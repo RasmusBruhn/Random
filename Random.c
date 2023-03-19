@@ -27,17 +27,17 @@ double NormalPDF(double x, void *Params);
 
 double ExpPDF(double x, void *Params);
 
-double ExpSampling(RNG_Seed Seed, void *Params);
+double ExpSampling(RNG_Seed *Seed, void *Params);
 
-double NormalSampling(RNG_Seed Seed, double Mu, double Sigma);
+double NormalSampling(RNG_Seed *Seed, double Mu, double Sigma);
 
-void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size);
+double *NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size);
 
-void ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size);
+double *ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size);
 
-void ExpSamplingArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size);
+double *ExpSamplingArrayM(RNG_Seed *Seed, void *Params, double *Array, size_t Size);
 
-double *NormalSamplingArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
+double *NormalSamplingArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size);
 
 // Test Random.h
 int main(int argc, char **argv)
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     uint64_t *xInt = NULL;
 
     // Generate seed
-    RNG_Seed Seed = RNG_SeedGenerate();
+    RNG_Seed *Seed = RNG_SeedGenerate();
     printf("Seed: %lu\n", *Seed);
 
     // Generate uniform ints
@@ -266,6 +266,13 @@ int main(int argc, char **argv)
 
     RNG_SeedDestroy(Seed);
 
+    printf("\nErrors:\n");
+
+    for (char *Error; (Error = RNG_ErrorArchive()) != NULL;)
+        printf("%s\n", Error);
+
+    RNG_ErrorClear();
+
     printf("\n");
     DBG_MemoryPrint();
 
@@ -381,7 +388,7 @@ double ExpPDF(double x, void *Params)
     return 1 / (((NormalParams *)Params)->sigma * _RNG_SQRTPI * _RNG_SQRT2) * exp(-fabs((x - ((NormalParams *)Params)->mu) / ((NormalParams *)Params)->sigma) + 0.5);
 }
 
-double ExpSampling(RNG_Seed Seed, void *Params)
+double ExpSampling(RNG_Seed *Seed, void *Params)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -404,28 +411,30 @@ double ExpSampling(RNG_Seed Seed, void *Params)
     return ((NormalParams *)Params)->mu - Sign * ((NormalParams *)Params)->sigma * log(1 - 2 * Uniform);
 }
 
-double NormalSampling(RNG_Seed Seed, double Mu, double Sigma)
+double NormalSampling(RNG_Seed *Seed, double Mu, double Sigma)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 
     return RNG_MonteCarlo(Seed, &NormalPDFArrayM, &ExpPDFArrayM, &ExpSamplingArrayM, &Params, 1);
 }
 
-void NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)
+double *NormalPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 {
-    RNG_NormalPDFArrayM(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma, Array, Size);
+    return RNG_NormalPDFArrayM(x, ((NormalParams *)Params)->mu, ((NormalParams *)Params)->sigma, Array, Size);
 }
 
-void ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size)
+double *ExpPDFArrayM(double *x, void *Params, double *Array, size_t Size)
 {
     double A = 1 / (((NormalParams *)Params)->sigma * _RNG_SQRTPI * _RNG_SQRT2) * exp(0.5);
     double B = 1 / ((NormalParams *)Params)->sigma;
 
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++x)
         *List = A * exp(-fabs(B * (*x - ((NormalParams *)Params)->mu)));
+
+    return Array;
 }
 
-void ExpSamplingArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
+double *ExpSamplingArrayM(RNG_Seed *Seed, void *Params, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -450,9 +459,11 @@ void ExpSamplingArrayM(RNG_Seed Seed, void *Params, double *Array, size_t Size)
         // Get from distribution
         *List = ((NormalParams *)Params)->mu - Sign * log(1 - 2 * Uniform);
     }
+
+    return Array;
 }
 
-double *NormalSamplingArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
+double *NormalSamplingArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size)
 {
     NormalParams Params = {.mu = Mu, .sigma = Sigma};
 

@@ -16,14 +16,21 @@
 #define _RNG_ERRORMES_MALLOC "Unable to allocate memory (Size: %lu)"
 #define _RNG_ERRORMES_CREATESEED "Unable to create seed"
 #define _RNG_ERRORMES_GENERATE "Unable to generate random %s"
+#define _RNG_ERRORMES_PMF "Unable to generate PMF for %s"
 #define _RNG_ERRORMES_PDF "Unable to generate PDF for %s"
 #define _RNG_ERRORMES_CDF "Unable to generate CDF for %s"
 #define _RNG_ERRORMES_ICDF "Unable to generate ICDF for %s"
 #define _RNG_ERRORMES_LARGERTHAN "The value of %s must not be smaller than %s but received (%lu, %lu)"
-#define _RNG_ERRORMES_LARGERTHANF "The value of %s must not be smaller than %s but received (%g, %g)"
-#define _RNG_ERRORMES_NOTNEGATIVE "The value of %s must not be negative, but received %g"
+#define _RNG_ERRORMES_LARGERTHANF "The value of %s must not be smaller than %s but received (%.3g, %.3g)"
+#define _RNG_ERRORMES_NOTNEGATIVE "The value of %s must not be negative, but received %.3g"
+#define _RNG_ERRORMES_INRANGE "The value of %s must be in the range [%.3g, %.3g] but received %.3g"
+#define _RNG_ERRORMES_MONTECARLOSAMPLE "Unable to sample from bounding sampler"
+#define _RNG_ERRORMES_MONTECARLOPDF "Unable to evaluate PDF value"
+#define _RNG_ERRORMES_MONTECARLOBOUNDINGPDF "Unable to evaluate bounding PDF value"
+#define _RNG_ERRORMES_MONTECARLOPMF "Unable to evaluate PMF value"
+#define _RNG_ERRORMES_MONTECARLOBOUNDINGPMF "Unable to evaluate bounding PMF value"
 
-typedef uint64_t* RNG_Seed;
+typedef uint64_t RNG_Seed;
 typedef struct ___RNG_BinomialParams _RNG_BinomialParams;
 
 struct ___RNG_BinomialParams
@@ -33,27 +40,27 @@ struct ___RNG_BinomialParams
 };
 
 // Generates a seed, the sed must be destroyed when no longer used
-RNG_Seed RNG_SeedGenerate();
+RNG_Seed *RNG_SeedGenerate();
 
 // Creates a seed from a number, the sed must be destroyed when no longer used
 // Value: The number to convert to a seed
-RNG_Seed RNG_SeedCreate(uint64_t Value);
+RNG_Seed *RNG_SeedCreate(uint64_t Value);
 
 // Destroys a seed, it must not be used after running this
-void RNG_SeedDestroy(RNG_Seed Seed);
+void RNG_SeedDestroy(RNG_Seed *Seed);
 
 // Get a uniform random int
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
-uint64_t RNG_Int(RNG_Seed Seed, uint64_t Min, uint64_t Max);
+uint64_t RNG_Int(RNG_Seed *Seed, uint64_t Min, uint64_t Max);
 
 // Get an array of uniform random int
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
 // Size: The size of the array
-uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size);
+uint64_t *RNG_IntArray(RNG_Seed *Seed, uint64_t Min, uint64_t Max, size_t Size);
 
 // Fill an array with uniform random int
 // Seed: The seed to use and update, NULL to use global seed
@@ -61,20 +68,20 @@ uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size);
 // Max: The maximum value
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size);
+uint64_t *RNG_IntArrayM(RNG_Seed *Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size);
 
 // Get a uniform random float
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
-double RNG_Float(RNG_Seed Seed, double Min, double Max);
+double RNG_Float(RNG_Seed *Seed, double Min, double Max);
 
 // Get an array of uniform random float
 // Seed: The seed to use and update, NULL to use global seed
 // Min: The minimum value
 // Max: The maximum value
 // Size: The size of the array
-double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size);
+double *RNG_FloatArray(RNG_Seed *Seed, double Min, double Max, size_t Size);
 
 // Fill an array with uniform random float
 // Seed: The seed to use and update, NULL to use global seed
@@ -82,20 +89,20 @@ double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size);
 // Max: The maximum value
 // Array: The array to fill
 // Size: The size of the array
-double *RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size);
+double *RNG_FloatArrayM(RNG_Seed *Seed, double Min, double Max, double *Array, size_t Size);
 
 // Get a random number from an exponential distibution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
 // x0: The minimu x possible
 // l: The length scale of the distribution
-double RNG_Exp(RNG_Seed Seed, double x0, double l);
+double RNG_Exp(RNG_Seed *Seed, double x0, double l);
 
 // Get an array of random numbers from an exponential distribution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
 // x0: The minimu x possible
 // l: The length scale of the distribution
 // Size: The size of the array
-double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size);
+double *RNG_ExpArray(RNG_Seed *Seed, double x0, double l, size_t Size);
 
 // Fill an array with random numbers from an exponential distribution (1 / l * exp(-x / l))
 // Seed: The seed to use and update, NULL to use global seed
@@ -103,7 +110,7 @@ double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size);
 // l: The length scale of the distribution
 // Array: The array to fill
 // Size: The size of the array
-double *RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size);
+double *RNG_ExpArrayM(RNG_Seed *Seed, double x0, double l, double *Array, size_t Size);
 
 // Get the PDF for an exponential distribution (1 / l * exp(-x / l))
 // x: The x-value to get the y-value for
@@ -172,14 +179,14 @@ double *RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t 
 // Seed: The seed to use and update, NULL to use global seed
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
-double RNG_Normal(RNG_Seed Seed, double Mu, double Sigma);
+double RNG_Normal(RNG_Seed *Seed, double Mu, double Sigma);
 
 // Get an array of random numbers from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // Seed: The seed to use and update, NULL to use global seed
 // Mu: The mean of the distribution
 // Sigma: The standard deviation of the distribution
 // Size: The size of the array
-double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
+double *RNG_NormalArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size);
 
 // Fill an array with random numbers from a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // Seed: The seed to use and update, NULL to use global seed
@@ -187,7 +194,7 @@ double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size);
 // Sigma: The standard deviation of the distribution
 // Array: The array to fill
 // Size: The size of the array
-double *RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size);
+double *RNG_NormalArrayM(RNG_Seed *Seed, double Mu, double Sigma, double *Array, size_t Size);
 
 // Get the PDF for a normal distribution (1 / (sigma * sqrt(2 * pi)) * exp(- (x - mu) ** 2 / (2 * sigma ** 2)))
 // x: The x-value to get the y-value for
@@ -255,20 +262,20 @@ double *RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, 
 // Get a random number from the poisson distribution (lambda ** n * exp(lambda) / n!)
 // Seed: The seed to use and update, NULL to use global seed
 // Lambda: The mean value of the distribution
-uint64_t RNG_Poisson(RNG_Seed Seed, double Lambda);
+uint64_t RNG_Poisson(RNG_Seed *Seed, double Lambda);
 
 // Get an array of random numbers from the poisson distribution (lambda ** n * exp(lambda) / n!)
 // Seed: The seed to use and update, NULL to use global seed
 // Lambda: The mean value of the distribution
 // Size: The size of the array
-uint64_t *RNG_PoissonArray(RNG_Seed Seed, double Lambda, size_t Size);
+uint64_t *RNG_PoissonArray(RNG_Seed *Seed, double Lambda, size_t Size);
 
 // Fills an array of random numbers from the poisson distribution (lambda ** n * exp(lambda) / n!)
 // Seed: The seed to use and update, NULL to use global seed
 // Lambda: The mean value of the distribution
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *RNG_PoissonArrayM(RNG_Seed Seed, double Lambda, uint64_t *Array, size_t Size);
+uint64_t *RNG_PoissonArrayM(RNG_Seed *Seed, double Lambda, uint64_t *Array, size_t Size);
 
 // Get the PMF for a poisson distribution (lambda ** n * exp(lambda) / n!)
 // n: The position to get the PMF for
@@ -300,7 +307,7 @@ double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t S
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the poisson distribution (lambda ** n * exp(lambda) / n!)
 // n: The positions to get the PMF for
@@ -313,14 +320,14 @@ double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, 
 // Seed: The seed to use and update, NULL to use global seed
 // N: The number of events to draw
 // p: The probability that an event is a success
-uint64_t RNG_Binomial(RNG_Seed Seed, uint64_t N, double p);
+uint64_t RNG_Binomial(RNG_Seed *Seed, uint64_t N, double p);
 
 // Get an array of random numbers from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // Seed: The seed to use and update, NULL to use global seed
 // N: The number of events to draw
 // p: The probability that an event is a success
 // Size: The size of the array
-uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size);
+uint64_t *RNG_BinomialArray(RNG_Seed *Seed, uint64_t N, double p, size_t Size);
 
 // Fills an array of random numbers from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // Seed: The seed to use and update, NULL to use global seed
@@ -328,7 +335,7 @@ uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size);
 // p: The probability that an event is a success
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size);
+uint64_t *RNG_BinomialArrayM(RNG_Seed *Seed, uint64_t N, double p, uint64_t *Array, size_t Size);
 
 // Get the PMF for a binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // n: The position to get the PMF for
@@ -363,7 +370,7 @@ double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t 
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // n: The positions to get the PMF for
@@ -379,7 +386,7 @@ double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array,
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-double RNG_MonteCarlo(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
+double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -389,7 +396,7 @@ double RNG_MonteCarlo(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params,
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-double *RNG_MonteCarloArray(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -400,7 +407,7 @@ double *RNG_MonteCarloArray(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *P
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-double *RNG_MonteCarloArrayM(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size);
+double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -409,7 +416,7 @@ double *RNG_MonteCarloArrayM(RNG_Seed Seed, void *(*PDFArrayM)(double *x, void *
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier);
+uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -419,7 +426,7 @@ uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n, void 
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -430,7 +437,7 @@ uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *n,
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void *(*PMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void *(*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
+uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
 
 // From libit
 double _RNG_erfinv(double x);
@@ -469,7 +476,7 @@ double _RNG_erfinv(double x);
 #define _RNG_1_E 0.36787944117144233
 #define _RNG_E 2.718281828459045
 
-uint64_t _RNG_GlobalSeed = 0;
+RNG_Seed _RNG_GlobalSeed = 0;
 
 // Get a random uint64_t and update the seed to be that number
 // Seed (RNG_Seed): The seed to use and update
@@ -479,13 +486,13 @@ uint64_t _RNG_GlobalSeed = 0;
 // Seed (RNG_Seed): The seed to use and update
 #define RNG_FloatFast(Seed) ((double) RNG_IntFast(Seed) / RNG_MAX)
 
-RNG_Seed RNG_SeedGenerate()
+RNG_Seed *RNG_SeedGenerate()
 {
     // Get the seed
     uint64_t Value = (uint64_t) time(NULL) ^ (uint64_t) clock();
 
     // Create seed
-    RNG_Seed Seed = RNG_SeedCreate(Value);
+    RNG_Seed *Seed = RNG_SeedCreate(Value);
 
     if (Seed == NULL)
         _RNG_ErrorAdd(_RNG_ERRORMES_CREATESEED);
@@ -493,10 +500,10 @@ RNG_Seed RNG_SeedGenerate()
     return Seed;
 }
 
-RNG_Seed RNG_SeedCreate(uint64_t Value)
+RNG_Seed *RNG_SeedCreate(uint64_t Value)
 {
     // Allocate memory for it
-    RNG_Seed Seed = (RNG_Seed)malloc(sizeof(uint64_t));
+    RNG_Seed *Seed = (RNG_Seed *)malloc(sizeof(RNG_Seed));
 
     if (Seed == NULL)
     {
@@ -510,12 +517,12 @@ RNG_Seed RNG_SeedCreate(uint64_t Value)
     return Seed;
 }
 
-void RNG_SeedDestroy(RNG_Seed Seed)
+void RNG_SeedDestroy(RNG_Seed *Seed)
 {
     free(Seed);
 }
 
-uint64_t RNG_Int(RNG_Seed Seed, uint64_t Min, uint64_t Max)
+uint64_t RNG_Int(RNG_Seed *Seed, uint64_t Min, uint64_t Max)
 {
     uint64_t Value;
 
@@ -528,7 +535,7 @@ uint64_t RNG_Int(RNG_Seed Seed, uint64_t Min, uint64_t Max)
     return Value;
 }
 
-uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size)
+uint64_t *RNG_IntArray(RNG_Seed *Seed, uint64_t Min, uint64_t Max, size_t Size)
 {
     // Get memory
     uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
@@ -549,7 +556,7 @@ uint64_t *RNG_IntArray(RNG_Seed Seed, uint64_t Min, uint64_t Max, size_t Size)
     return Array;
 }
 
-uint64_t *RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size)
+uint64_t *RNG_IntArrayM(RNG_Seed *Seed, uint64_t Min, uint64_t Max, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -571,7 +578,7 @@ uint64_t *RNG_IntArrayM(RNG_Seed Seed, uint64_t Min, uint64_t Max, uint64_t *Arr
     return Array;
 }
 
-double RNG_Float(RNG_Seed Seed, double Min, double Max)
+double RNG_Float(RNG_Seed *Seed, double Min, double Max)
 {
     double Value;
 
@@ -584,7 +591,7 @@ double RNG_Float(RNG_Seed Seed, double Min, double Max)
     return Value;
 }
 
-double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size)
+double *RNG_FloatArray(RNG_Seed *Seed, double Min, double Max, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -606,7 +613,7 @@ double *RNG_FloatArray(RNG_Seed Seed, double Min, double Max, size_t Size)
     return Array;
 }
 
-double *RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, size_t Size)
+double *RNG_FloatArrayM(RNG_Seed *Seed, double Min, double Max, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -627,7 +634,7 @@ double *RNG_FloatArrayM(RNG_Seed Seed, double Min, double Max, double *Array, si
     return Array;
 }
 
-double RNG_Exp(RNG_Seed Seed, double x0, double l)
+double RNG_Exp(RNG_Seed *Seed, double x0, double l)
 {
     double Value;
 
@@ -640,7 +647,7 @@ double RNG_Exp(RNG_Seed Seed, double x0, double l)
     return Value;
 }
 
-double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size)
+double *RNG_ExpArray(RNG_Seed *Seed, double x0, double l, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -662,7 +669,7 @@ double *RNG_ExpArray(RNG_Seed Seed, double x0, double l, size_t Size)
     return Array;
 }
 
-double *RNG_ExpArrayM(RNG_Seed Seed, double x0, double l, double *Array, size_t Size)
+double *RNG_ExpArrayM(RNG_Seed *Seed, double x0, double l, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -861,7 +868,7 @@ double *RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t 
     return Array;
 }
 
-double RNG_Normal(RNG_Seed Seed, double Mu, double Sigma)
+double RNG_Normal(RNG_Seed *Seed, double Mu, double Sigma)
 {
     double Value;
 
@@ -874,7 +881,7 @@ double RNG_Normal(RNG_Seed Seed, double Mu, double Sigma)
     return Value;
 }
 
-double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
+double *RNG_NormalArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -896,7 +903,7 @@ double *RNG_NormalArray(RNG_Seed Seed, double Mu, double Sigma, size_t Size)
     return Array;
 }
 
-double *RNG_NormalArrayM(RNG_Seed Seed, double Mu, double Sigma, double *Array, size_t Size)
+double *RNG_NormalArrayM(RNG_Seed *Seed, double Mu, double Sigma, double *Array, size_t Size)
 {
     if (Sigma < 0)
     {
@@ -1102,16 +1109,20 @@ double *RNG_NormalICDFArrayM(double *y, double Mu, double Sigma, double *Array, 
     return Array;
 }
 
-uint64_t RNG_Poisson(RNG_Seed Seed, double Lambda)
+uint64_t RNG_Poisson(RNG_Seed *Seed, double Lambda)
 {
     uint64_t Value;
 
-    RNG_PoissonArrayM(Seed, Lambda, &Value, 1);
+    if (RNG_PoissonArrayM(Seed, Lambda, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "poisson");
+        return -1;
+    }
 
     return Value;
 }
 
-uint64_t *RNG_PoissonArray(RNG_Seed Seed, double Lambda, size_t Size)
+uint64_t *RNG_PoissonArray(RNG_Seed *Seed, double Lambda, size_t Size)
 {
     // Get memory
     uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
@@ -1123,21 +1134,50 @@ uint64_t *RNG_PoissonArray(RNG_Seed Seed, double Lambda, size_t Size)
     }
 
     // Get numbers
-    RNG_PoissonArrayM(Seed, Lambda, Array, Size);
+    if (RNG_PoissonArrayM(Seed, Lambda, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "poisson");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_PoissonArrayM(RNG_Seed Seed, double Lambda, uint64_t *Array, size_t Size)
+uint64_t *RNG_PoissonArrayM(RNG_Seed *Seed, double Lambda, uint64_t *Array, size_t Size)
 {
-    return RNG_MonteCarloUIntArrayM(Seed, &_RNG_PoissonPMFArrayM, &_RNG_PoissonBoundingPMFArrayM, &_RNG_PoissonBoundingSamplerArrayM, &Lambda, 1, Array, Size);
+    if (Lambda < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Lambda", Lambda);
+        return NULL;
+    }
+
+    if (Lambda == 0)
+    {
+        for (uint64_t *List = Array, *EndList = Array + Size; List < EndList; ++List)
+            *List = 0;
+
+        return Array;
+    }
+
+    if (RNG_MonteCarloUIntArrayM(Seed, &_RNG_PoissonPMFArrayM, &_RNG_PoissonBoundingPMFArrayM, &_RNG_PoissonBoundingSamplerArrayM, &Lambda, 1, Array, Size) == NULL)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_GENERATE, "poisson");
+        return NULL;
+    }
+
+    return Array;
 }
 
 double RNG_PoissonPMF(uint64_t n, double Lambda)
 {
     double Value;
 
-    RNG_PoissonPMFArrayM(&n, Lambda, &Value, 1);
+    if (RNG_PoissonPMFArrayM(&n, Lambda, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "poisson");
+        return NAN;
+    }
 
     return Value;
 }
@@ -1154,17 +1194,42 @@ double *RNG_PoissonPMFArray(uint64_t *n, double Lambda, size_t Size)
     }
 
     // Get numbers
-    RNG_PoissonPMFArrayM(n, Lambda, Array, Size);
+    if (RNG_PoissonPMFArrayM(n, Lambda, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "poisson");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
 double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t Size)
 {
-    _RNG_PoissonPMFArrayM(n, &Lambda, Array, Size);
+    if (Lambda < 0)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_NOTNEGATIVE, "Lambda", Lambda);
+        return NULL;
+    }
+
+    if (Lambda == 0)
+    {
+        for (double *List = Array, *EndList = Array + Size; List < EndList; ++List, ++n)
+            *List = ((*n == 0) ? (1) : (0));
+
+        return Array;
+    }
+
+    if (_RNG_PoissonPMFArrayM(n, &Lambda, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "poisson");
+        return NULL;
+    }
+
+    return Array;
 }
 
-void _RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
 {
     double Lambda = *(double *)Params;
 
@@ -1174,9 +1239,11 @@ void _RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
         *List = exp(lLambda * (double)(*n) - Lambda - lgamma((double)(*n) + 1));
+
+    return Array;
 }
 
-void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size)
+uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size)
 {
     // Unpack params
     double Lambda = *(double *)Params;
@@ -1199,7 +1266,7 @@ void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Ar
             *List = (uint64_t)(- log(1 - Uniform));
         }
 
-        return;
+        return Array;
     }
 
     // Calulate constants
@@ -1232,9 +1299,11 @@ void _RNG_PoissonBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Ar
             *List = (uint64_t)(Lambda - SqrtLambda * log(1 - Uniform));
         }
     }
+
+    return Array;
 }
 
-void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
 {
     // Unpack params
     double Lambda = *(double *)Params;
@@ -1247,7 +1316,7 @@ void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, siz
         for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
             *List = Amp * exp(-(double)(*n));
 
-        return;
+        return Array;
     }
 
     // Calulate constants
@@ -1275,18 +1344,24 @@ void _RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, siz
         else
             *List = AmpA * (1 - exp(Std * ((double)nThreshold - Lambda))) / (exp(Std) - 1) + AmpB * (1 - exp(-Std * ((double)nThreshold + 1 - Lambda))) / (1 - exp(-Std));
     }
+
+    return Array;
 }
 
-uint64_t RNG_Binomial(RNG_Seed Seed, uint64_t N, double p)
+uint64_t RNG_Binomial(RNG_Seed *Seed, uint64_t N, double p)
 {
     uint64_t Value;
 
-    RNG_BinomialArrayM(Seed, N, p, &Value, 1);
+    if (RNG_BinomialArrayM(Seed, N, p, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "binomial");
+        return -1;
+    }
 
     return Value;
 }
 
-uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size)
+uint64_t *RNG_BinomialArray(RNG_Seed *Seed, uint64_t N, double p, size_t Size)
 {
     // Get memory
     uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
@@ -1298,23 +1373,82 @@ uint64_t *RNG_BinomialArray(RNG_Seed Seed, uint64_t N, double p, size_t Size)
     }
 
     // Get numbers
-    RNG_BinomialArrayM(Seed, N, p, Array, Size);
+    if (RNG_BinomialArrayM(Seed, N, p, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "binomial");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_BinomialArrayM(RNG_Seed Seed, uint64_t N, double p, uint64_t *Array, size_t Size)
+uint64_t *RNG_BinomialArrayM(RNG_Seed *Seed, uint64_t N, double p, uint64_t *Array, size_t Size)
 {
+    if (p < 0 || p > 1)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_INRANGE, "p", 0, 1, p);
+        return NULL;
+    }
+
+    if (p == 0 || N == 0)
+    {
+        for (uint64_t *List = Array, *EndList = Array + Size; List < EndList; ++List)
+            *List = 0;
+
+        return Array;
+    }
+
+    if (p == 1)
+    {
+        for (uint64_t *List = Array, *EndList = Array + Size; List < EndList; ++List)
+            *List = N;
+
+        return Array;
+    }
+
+    if (N == 1)
+    {
+        // Get the global seed
+        extern uint64_t _RNG_GlobalSeed;
+
+        if (Seed == NULL)
+            Seed = &_RNG_GlobalSeed;
+
+        for (uint64_t *List = Array, *EndList = Array + Size; List < EndList; ++List)
+        {
+            double Uniform = RNG_FloatFast(Seed);
+
+            if (Uniform < p)
+                *List = 0;
+
+            else
+                *List = 1;
+        }
+
+        return Array;
+    }
+
     _RNG_BinomialParams Params = {.N = N, .p = p};
 
-    return RNG_MonteCarloUIntArrayM(Seed, &_RNG_BinomialPMFArrayM, &_RNG_BinomialBoundingPMFArrayM, &_RNG_BinomialBoundingSamplerArrayM, &Params, 1, Array, Size);
+    if (RNG_MonteCarloUIntArrayM(Seed, &_RNG_BinomialPMFArrayM, &_RNG_BinomialBoundingPMFArrayM, &_RNG_BinomialBoundingSamplerArrayM, &Params, 1, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "binomial");
+        return NULL;
+    }
+
+    return Array;
 }
 
 double RNG_BinomialPMF(uint64_t n, uint64_t N, double p)
 {
     double Value;
 
-    RNG_BinomialPMFArrayM(&n, N, p, &Value, 1);
+    if (RNG_BinomialPMFArrayM(&n, N, p, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "binomial");
+        return NAN;
+    }
 
     return Value;
 }
@@ -1331,19 +1465,52 @@ double *RNG_BinomialPMFArray(uint64_t *n, uint64_t N, double p, size_t Size)
     }
 
     // Get numbers
-    RNG_BinomialPMFArrayM(n, N, p, Array, Size);
+    if (RNG_BinomialPMFArrayM(n, N, p, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "binomial");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
 double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, size_t Size)
 {
+    if (p < 0 || p > 1)
+    {
+        _RNG_ErrorSet(_RNG_ERRORMES_INRANGE, "p", 0, 1, p);
+        return NULL;
+    }
+
+    if (p == 0)
+    {
+        for (double *List = Array, *EndList = Array + Size; List < EndList; ++List, ++n)
+            *List = ((*n == 0) ? (1) : (0));
+
+        return Array;
+    }
+
+    if (p == 1)
+    {
+        for (double *List = Array, *EndList = Array + Size; List < EndList; ++List, ++n)
+            *List = ((*n == N) ? (1) : (0));
+
+        return Array;
+    }
+
     _RNG_BinomialParams Params = {.N = N, .p = p};
 
-    _RNG_BinomialPMFArrayM(n, &Params, Array, Size);
+    if (_RNG_BinomialPMFArrayM(n, &Params, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_PMF, "binomial");
+        return NULL;
+    }
+    
+    return Array;
 }
 
-void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
 {
     double N = (double)((_RNG_BinomialParams *)Params)->N;
     double p = ((_RNG_BinomialParams *)Params)->p;
@@ -1355,10 +1522,12 @@ void _RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Siz
 
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++n)
-        *List = exp(lgammaN - lgamma((double)(*n) + 1) - lgamma(N - (double)(*n) + 1) + (double)(*n) * logP + (N - (double)(*n)) * logQ);
+        *List = ((*n > N) ? (0) : (exp(lgammaN - lgamma((double)(*n) + 1) - lgamma(N - (double)(*n) + 1) + (double)(*n) * logP + (N - (double)(*n)) * logQ)));
+
+    return Array;
 }
 
-void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size)
+uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -1467,9 +1636,11 @@ void _RNG_BinomialBoundingSamplerArrayM(RNG_Seed Seed, void *Params, uint64_t *A
             }
         }
     }
+
+    return Array;
 }
 
-void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
 {
     // Unpack params
     double N = (double)((_RNG_BinomialParams *)Params)->N;
@@ -1539,18 +1710,24 @@ void _RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, si
                 *List = ModA * (1 - exp(-DecayRate * muLeft)) + ModB * (1 - exp(-DecayRate * (1 - muLeft)));
         }
     }
+
+    return Array;
 }
 
-double RNG_MonteCarlo(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier)
+double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier)
 {
     double Value;
 
-    RNG_MonteCarloArrayM(Seed, PDFArrayM, BoundingPDFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, &Value, 1);
+    if (RNG_MonteCarloArrayM(Seed, PDFArrayM, BoundingPDFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "Monte Carlo");
+        return NAN;
+    }
 
     return Value;
 }
 
-double *RNG_MonteCarloArray(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
+double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -1562,12 +1739,17 @@ double *RNG_MonteCarloArray(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Pa
     }
 
     // Get numbers
-    RNG_MonteCarloArrayM(Seed, PDFArrayM, BoundingPDFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, Array, Size);
+    if (RNG_MonteCarloArrayM(Seed, PDFArrayM, BoundingPDFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "Monte Carlo");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size)
+double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -1581,7 +1763,7 @@ void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Para
     if (x == NULL)
     {
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
-        return;
+        return NULL;
     }
 
     double *PDF = (double *)malloc(sizeof(double) * Size);
@@ -1590,7 +1772,7 @@ void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Para
     {
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
         free(x);
-        return;
+        return NULL;
     }
 
     double *BoundingPDF = (double *)malloc(sizeof(double) * Size);
@@ -1600,30 +1782,53 @@ void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Para
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
         free(x);
         free(PDF);
-        return;
+        return NULL;
     }
 
     // Set end point
-    double *ArrayEnd = Array + Size;
+    double *EndList = Array + Size;
+    double *List = Array;
     double SuccessRate = 1;
 
     // Loop until done
     while (true)
     {
         // Get x samples
-        size_t SampleCount = (size_t)((double)(ArrayEnd - Array) / SuccessRate * _RNG_MONTECARLO_BUFFER);
+        size_t SampleCount = (size_t)((double)(EndList - List) / SuccessRate * _RNG_MONTECARLO_BUFFER);
 
         if (SampleCount > Size)
             SampleCount = Size;
 
-        BoundingSamplerArrayM(Seed, Params, x, SampleCount);
+        if (BoundingSamplerArrayM(Seed, Params, x, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOSAMPLE);
+            free(x);
+            free(PDF);
+            free(BoundingPDF);
+            return NULL;
+        }
 
         // Get the PDF values
-        PDFArrayM(x, Params, PDF, SampleCount);
-        BoundingPDFArrayM(x, Params, BoundingPDF, SampleCount);
+        if (PDFArrayM(x, Params, PDF, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOPDF);
+            free(x);
+            free(PDF);
+            free(BoundingPDF);
+            return NULL;
+        }
+
+        if (BoundingPDFArrayM(x, Params, BoundingPDF, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOBOUNDINGPDF);
+            free(x);
+            free(PDF);
+            free(BoundingPDF);
+            return NULL;
+        }
 
         // Check if they are good
-        double *OldArray = Array;
+        double *OldList = List;
 
         for (double *xSample = x, *PDFSample = PDF, *BoundingPDFSample = BoundingPDF, *xSampleEnd = xSample + SampleCount; xSample < xSampleEnd; ++xSample, ++PDFSample, ++BoundingPDFSample)
         {
@@ -1634,38 +1839,42 @@ void RNG_MonteCarloArrayM(RNG_Seed Seed, void (*PDFArrayM)(double *x, void *Para
             // Check if it should be kept
             if (Uniform < Prob)
             {
-                *(Array++) = *xSample;
+                *(List++) = *xSample;
 
                 // Check if it is done
-                if (Array >= ArrayEnd)
+                if (List >= EndList)
                 {
                     free(x);
                     free(PDF);
                     free(BoundingPDF);
 
-                    return;
+                    return Array;
                 }
             }
         }
 
         // Get the new success rate
-        SuccessRate = (double)(Array - OldArray) / (double)SampleCount;
+        SuccessRate = (double)(List - OldList) / (double)SampleCount;
 
         if (SuccessRate < _RNG_MONTECARLO_MINSUCCESS)
             SuccessRate = _RNG_MONTECARLO_MINSUCCESS;
     }
 }
 
-uint64_t RNG_MonteCarloUInt(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier)
+uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier)
 {
     uint64_t Value;
 
-    RNG_MonteCarloUIntArrayM(Seed, PMFArrayM, BoundingPMFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, &Value, 1);
+    if (RNG_MonteCarloUIntArrayM(Seed, PMFArrayM, BoundingPMFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, &Value, 1) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "Monte Carlo");
+        return -1;
+    }
 
     return Value;
 }
 
-uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
+uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
 {
     // Get memory
     uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
@@ -1677,12 +1886,17 @@ uint64_t *RNG_MonteCarloUIntArray(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, 
     }
 
     // Get numbers
-    RNG_MonteCarloUIntArrayM(Seed, PMFArrayM, BoundingPMFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, Array, Size);
+    if (RNG_MonteCarloUIntArrayM(Seed, PMFArrayM, BoundingPMFArrayM, BoundingSamplerArrayM, Params, BoundingMultiplier, Array, Size) == NULL)
+    {
+        _RNG_ErrorAdd(_RNG_ERRORMES_GENERATE, "Monte Carlo");
+        free(Array);
+        return NULL;
+    }
 
     return Array;
 }
 
-void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), void (*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), void (*BoundingSamplerArrayM)(RNG_Seed Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size)
+uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -1696,7 +1910,7 @@ void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void
     if (n == NULL)
     {
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(uint64_t) * Size);
-        return;
+        return NULL;
     }
 
     double *PMF = (double *)malloc(sizeof(double) * Size);
@@ -1705,7 +1919,7 @@ void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void
     {
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
         free(n);
-        return;
+        return NULL;
     }
 
     double *BoundingPMF = (double *)malloc(sizeof(double) * Size);
@@ -1715,30 +1929,53 @@ void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void
         _RNG_ErrorSet(_RNG_ERRORMES_MALLOC, sizeof(double) * Size);
         free(n);
         free(PMF);
-        return;
+        return NULL;
     }
 
     // Set end point
-    uint64_t *ArrayEnd = Array + Size;
+    uint64_t *EndList = Array + Size;
+    uint64_t *List = Array;
     double SuccessRate = 1;
 
     // Loop until done
     while (true)
     {
         // Get x samples
-        size_t SampleCount = (size_t)((double)(ArrayEnd - Array) / SuccessRate * _RNG_MONTECARLO_BUFFER);
+        size_t SampleCount = (size_t)((double)(EndList - List) / SuccessRate * _RNG_MONTECARLO_BUFFER);
 
         if (SampleCount > Size)
             SampleCount = Size;
 
-        BoundingSamplerArrayM(Seed, Params, n, SampleCount);
+        if (BoundingSamplerArrayM(Seed, Params, n, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOSAMPLE);
+            free(n);
+            free(PMF);
+            free(BoundingPMF);
+            return NULL;
+        }
 
         // Get the PDF values
-        PMFArrayM(n, Params, PMF, SampleCount);
-        BoundingPMFArrayM(n, Params, BoundingPMF, SampleCount);
+        if (PMFArrayM(n, Params, PMF, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOPMF);
+            free(n);
+            free(PMF);
+            free(BoundingPMF);
+            return NULL;
+        }
+
+        if (BoundingPMFArrayM(n, Params, BoundingPMF, SampleCount) == NULL)
+        {
+            _RNG_ErrorAdd(_RNG_ERRORMES_MONTECARLOBOUNDINGPMF);
+            free(n);
+            free(PMF);
+            free(BoundingPMF);
+            return NULL;
+        }
 
         // Check if they are good
-        uint64_t *OldArray = Array;
+        uint64_t *OldList = List;
         double *PMFSample = PMF;
         double *BoundingPMFSample = BoundingPMF;
 
@@ -1751,22 +1988,22 @@ void RNG_MonteCarloUIntArrayM(RNG_Seed Seed, void (*PMFArrayM)(uint64_t *n, void
             // Check if it should be kept
             if (Uniform < Prob)
             {
-                *(Array++) = *nSample;
+                *(List++) = *nSample;
 
                 // Check if it is done
-                if (Array >= ArrayEnd)
+                if (List >= EndList)
                 {
                     free(n);
                     free(PMF);
                     free(BoundingPMF);
 
-                    return;
+                    return Array;
                 }
             }
         }
 
         // Get the new success rate
-        SuccessRate = (double)(Array - OldArray) / (double)SampleCount;
+        SuccessRate = (double)(List - OldList) / (double)SampleCount;
 
         if (SuccessRate < _RNG_MONTECARLO_MINSUCCESS)
             SuccessRate = _RNG_MONTECARLO_MINSUCCESS;
