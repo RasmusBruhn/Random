@@ -43,6 +43,7 @@ double *NormalSamplingArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size
 int main(int argc, char **argv)
 {
     size_t Size = 1000000;
+    size_t TestSize = 100;
     double *Hist = NULL;
     uint64_t *IntArray = NULL;
     double *FloatArray = NULL;
@@ -64,6 +65,33 @@ int main(int argc, char **argv)
     free(IntArray);
     free(Hist);
 
+    // Test special cases for ints
+    IntArray = RNG_IntArray(Seed, 0, 0, TestSize);
+    for (uint64_t *List = IntArray, *EndList = IntArray + TestSize; List < EndList; ++List)
+        if (*List != 0)
+        {
+            printf("Error generating span 0 uniform ints: %lu\n", *List);
+            return -1;
+        }
+
+    free(IntArray);
+
+    // Test errors for ints
+    if (RNG_Int(Seed, 10, 9) != -1)
+    {
+        printf("Excepted error for negative span int");
+        return -1;
+    }
+
+    if (RNG_IntArray(Seed, 10, 9, TestSize) != NULL)
+    {
+        printf("Excepted error for negative span int array");
+        return -1;
+    }
+
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+
     // Generate uniform floats
     printf("Uniform floats: %.3g, %.3g, %.3g\n", RNG_Float(Seed, 0, 1), RNG_Float(Seed, 0, 1), RNG_Float(NULL, 0, 1));
 
@@ -73,6 +101,33 @@ int main(int argc, char **argv)
 
     free(FloatArray);
     free(Hist);
+
+    // Test special cases for floats
+    FloatArray = RNG_FloatArray(Seed, 0, 0, TestSize);
+    for (double *List = FloatArray, *EndList = FloatArray + TestSize; List < EndList; ++List)
+        if (*List != 0)
+        {
+            printf("Error generating span 0 uniform floats: %.3g\n", *List);
+            return -1;
+        }
+
+    free(FloatArray);
+
+    // Test errors for floats
+    if (!isnan(RNG_Float(Seed, 1, 0)))
+    {
+        printf("Excepted error for negative span float");
+        return -1;
+    }
+
+    if (RNG_FloatArray(Seed, 1, 0, TestSize) != NULL)
+    {
+        printf("Excepted error for negative span float array");
+        return -1;
+    }
+
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
 
     // Generate exp
     printf("Exp: %.3g, %.3g, %.3g\n", RNG_Exp(Seed, 0, 1), RNG_Exp(Seed, 0, 1), RNG_Exp(NULL, 0, 1));
@@ -110,6 +165,111 @@ int main(int argc, char **argv)
 
     free(xFloat);
     free(FloatArray);
+
+    // Test special cases for exp
+    FloatArray = RNG_ExpArray(Seed, 0, 0, TestSize);
+    for (double *List = FloatArray, *EndList = FloatArray + TestSize; List < EndList; ++List)
+        if (*List != 0)
+        {
+            printf("Error generating l = 0, exp: %.3g\n", *List);
+            return -1;
+        }
+
+    free(FloatArray);
+
+    if (RNG_ExpPDF(-1, 0, 1) != 0 || RNG_ExpPDF(INFINITY, 0, 1) != 0)
+    {
+        printf("Error evaluating PDF for exp");
+        return -1;
+    }
+
+    if (RNG_ExpPDF(-1, 0, 0) != 0 || !isinf(RNG_ExpPDF(0, 0, 0)) || RNG_ExpPDF(1, 0, 0) != 0)
+    {
+        printf("Error evaluating PDF for l = 0, exp");
+        return -1;
+    }
+
+    if (RNG_ExpCDF(-1, 0, 1) != 0 || RNG_ExpCDF(INFINITY, 0, 1) != 1)
+    {
+        printf("Error evaluating CDF for exp");
+        return -1;
+    }
+
+    if (RNG_ExpCDF(-1, 0, 0) != 0 || RNG_ExpCDF(0, 0, 0) != 1 || RNG_ExpCDF(1, 0, 0) != 1)
+    {
+        printf("Error evaluating CDF for l = 0, exp");
+        return -1;
+    }
+
+    if (RNG_ExpICDF(-1, 0, 1) != 0 || !isinf(RNG_ExpICDF(2, 0, 1)))
+    {
+        printf("Error evaluating ICDF for exp");
+        return -1;
+    }
+
+    if (RNG_ExpICDF(-1, 0, 0) != 0 || RNG_ExpICDF(0, 0, 0) != 0 || RNG_ExpICDF(1, 0, 0) != 0)
+    {
+        printf("Error evaluating ICDF for l = 0, exp");
+        return -1;
+    }
+
+    // Test errors for exp
+    if (!isnan(RNG_Exp(Seed, 0, -1)))
+    {
+        printf("Excepted error for negative l exp");
+        return -1;
+    }
+
+    if (RNG_ExpArray(Seed, 0, -1, TestSize) != NULL)
+    {
+        printf("Excepted error for negative l exp array");
+        return -1;
+    }
+
+    if (!isnan(RNG_ExpPDF(0, 0, -1)))
+    {
+        printf("Excepted error for negative l exp PDF");
+        return -1;
+    }
+
+    if (RNG_ExpPDFArray(0, 0, -1, TestSize) != NULL)
+    {
+        printf("Excepted error for negative l exp PDF array");
+        return -1;
+    }
+
+    if (!isnan(RNG_ExpCDF(0, 0, -1)))
+    {
+        printf("Excepted error for negative l exp CDF");
+        return -1;
+    }
+
+    if (RNG_ExpCDFArray(0, 0, -1, TestSize) != NULL)
+    {
+        printf("Excepted error for negative l exp CDF array");
+        return -1;
+    }
+
+    if (!isnan(RNG_ExpICDF(0, 0, -1)))
+    {
+        printf("Excepted error for negative l exp ICDF");
+        return -1;
+    }
+
+    if (RNG_ExpICDFArray(0, 0, -1, TestSize) != NULL)
+    {
+        printf("Excepted error for negative l exp ICDF array");
+        return -1;
+    }
+
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
+    RNG_ErrorArchive();
 
     // Generate normal
     printf("Normal: %.3g, %.3g, %.3g\n", RNG_Normal(Seed, 0, 1), RNG_Normal(Seed, 0, 1), RNG_Normal(NULL, 0, 1));

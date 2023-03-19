@@ -861,9 +861,17 @@ double *RNG_ExpICDFArrayM(double *y, double x0, double l, double *Array, size_t 
         return NULL;
     }
 
+    if (l == 0)
+    {
+        for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List)
+            *List = x0;
+
+        return Array;
+    }
+
     // Fill memory
     for (double *List = Array, *ListEnd = Array + Size; List < ListEnd; ++List, ++y)
-        *List = ((*y < 0) ? (0) : ((*y >= 1) ? (INFINITY) : (x0 - l * log(1 - *y))));
+        *List = ((*y < 0) ? (x0) : ((*y >= 1) ? (INFINITY) : (x0 - l * log(1 - *y))));
 
     return Array;
 }
