@@ -300,21 +300,21 @@ double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t S
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_PoissonPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size);
 
 // Fills an array of random numbers from the poisson bounding distribution
 // Seed: The seed to use and update, NULL to use global seed
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the poisson distribution (lambda ** n * exp(lambda) / n!)
 // n: The positions to get the PMF for
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size);
 
 // Get a random number from the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // Seed: The seed to use and update, NULL to use global seed
@@ -363,21 +363,21 @@ double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, 
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_BinomialPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size);
 
 // Fills an array of random numbers from the binomial bounding distribution
 // Seed: The seed to use and update, NULL to use global seed
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size);
+uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size);
 
 // Fills an array of bounding PMF values for the binomial distribution (N! / (n! * (N - n)!) p ** n * (1 - p) ** (N - n))
 // n: The positions to get the PMF for
 // Params: The parameters
 // Array: The array to fill
 // Size: The size of the array
-double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size);
+double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -386,7 +386,7 @@ double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array,
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier);
+double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -396,7 +396,7 @@ double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Para
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -407,7 +407,7 @@ double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size);
+double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier, double *Array, size_t Size);
 
 // Samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -416,7 +416,7 @@ double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, voi
 // BoundingSamplerArrayM: The function to get a sample form the bounding function, takes the arguments: Seed: The seed to use, Params: A pointer to some type containing all parameters for the sampler
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
-uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier);
+uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier);
 
 // Creates an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -426,7 +426,7 @@ uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, vo
 // Params: A pointer to some type containing all parameters for the PDFs
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
-uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size);
+uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier, size_t Size);
 
 // Fills an array with samples from some distribution using Monte Carlo simulation
 // Seed: The seed to use and update, NULL to use global seed
@@ -437,7 +437,7 @@ uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t 
 // BoundingMultiplier: The number to multiply the BoundingPDF with to allow it to be larger than the PDF
 // Size: The size of the array
 // Array: The array to fill
-uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
+uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *x, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size);
 
 // From libit
 double _RNG_erfinv(double x);
@@ -1237,7 +1237,7 @@ double *RNG_PoissonPMFArrayM(uint64_t *n, double Lambda, double *Array, size_t S
     return Array;
 }
 
-double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_PoissonPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size)
 {
     double Lambda = *(double *)Params;
 
@@ -1251,7 +1251,7 @@ double *_RNG_PoissonPMFArrayM(uint64_t *n, void *Params, double *Array, size_t S
     return Array;
 }
 
-uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size)
+uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size)
 {
     // Unpack params
     double Lambda = *(double *)Params;
@@ -1311,7 +1311,7 @@ uint64_t *_RNG_PoissonBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64
     return Array;
 }
 
-double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_PoissonBoundingPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size)
 {
     // Unpack params
     double Lambda = *(double *)Params;
@@ -1518,7 +1518,7 @@ double *RNG_BinomialPMFArrayM(uint64_t *n, uint64_t N, double p, double *Array, 
     return Array;
 }
 
-double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_BinomialPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size)
 {
     double N = (double)((_RNG_BinomialParams *)Params)->N;
     double p = ((_RNG_BinomialParams *)Params)->p;
@@ -1535,7 +1535,7 @@ double *_RNG_BinomialPMFArrayM(uint64_t *n, void *Params, double *Array, size_t 
     return Array;
 }
 
-uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size)
+uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -1648,7 +1648,7 @@ uint64_t *_RNG_BinomialBoundingSamplerArrayM(RNG_Seed *Seed, void *Params, uint6
     return Array;
 }
 
-double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array, size_t Size)
+double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, const void *Params, double *Array, size_t Size)
 {
     // Unpack params
     double N = (double)((_RNG_BinomialParams *)Params)->N;
@@ -1722,7 +1722,7 @@ double *_RNG_BinomialBoundingPMFArrayM(uint64_t *n, void *Params, double *Array,
     return Array;
 }
 
-double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier)
+double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier)
 {
     double Value;
 
@@ -1735,7 +1735,7 @@ double RNG_MonteCarlo(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Para
     return Value;
 }
 
-double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
+double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier, size_t Size)
 {
     // Get memory
     double *Array = (double *)malloc(sizeof(double) * Size);
@@ -1757,7 +1757,7 @@ double *RNG_MonteCarloArray(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void
     return Array;
 }
 
-double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, double *Array, size_t Size), void *Params, double BoundingMultiplier, double *Array, size_t Size)
+double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingPDFArrayM)(double *x, const void *Params, double *Array, size_t Size), double *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, double *Array, size_t Size), const void *Params, double BoundingMultiplier, double *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
@@ -1869,7 +1869,7 @@ double *RNG_MonteCarloArrayM(RNG_Seed *Seed, double *(*PDFArrayM)(double *x, voi
     }
 }
 
-uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier)
+uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier)
 {
     uint64_t Value;
 
@@ -1882,7 +1882,7 @@ uint64_t RNG_MonteCarloUInt(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, vo
     return Value;
 }
 
-uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, size_t Size)
+uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier, size_t Size)
 {
     // Get memory
     uint64_t *Array = (uint64_t *)malloc(sizeof(uint64_t) * Size);
@@ -1904,7 +1904,7 @@ uint64_t *RNG_MonteCarloUIntArray(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t 
     return Array;
 }
 
-uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, void *Params, uint64_t *Array, size_t Size), void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size)
+uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t *n, const void *Params, double *Array, size_t Size), double *(*BoundingPMFArrayM)(uint64_t *x, const void *Params, double *Array, size_t Size), uint64_t *(*BoundingSamplerArrayM)(RNG_Seed *Seed, const void *Params, uint64_t *Array, size_t Size), const void *Params, double BoundingMultiplier, uint64_t *Array, size_t Size)
 {
     // Get the global seed
     extern uint64_t _RNG_GlobalSeed;
