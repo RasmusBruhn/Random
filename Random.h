@@ -1,11 +1,9 @@
-#ifndef RANDOM2_H_INCLUDED
-#define RANDOM2_H_INCLUDED
+#ifndef RANDOM_H_INCLUDED
+#define RANDOM_H_INCLUDED
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <time.h>
-#include <math.h>
 
 #define ERR_PREFIX RNG
 #include <Error2.h>
@@ -383,4 +381,4 @@ uint64_t *RNG_MonteCarloUIntArrayM(RNG_Seed *Seed, double *(*PMFArrayM)(uint64_t
 // Seed (RNG_Seed): The seed to use and update
 #define RNG_FloatFast(Seed) ((double) RNG_IntFast(Seed) / RNG_MAX)
 
-#endif // RANDOM2_H_INCLUDED
+#endif

@@ -4,6 +4,12 @@
 #include <time.h>
 #include <math.h>
 #include "Random.h"
+#include <Defines.h>
+
+#define _RNG_SQRT2 1.4142135623730951
+#define _RNG_SQRTPI 1.7724538509055159
+#define _RNG_1_E 0.36787944117144233
+#define _RNG_E 2.718281828459045
 
 typedef struct __NormalParams
 {
@@ -40,7 +46,7 @@ double *ExpSamplingArrayM(RNG_Seed *Seed, const void *Params, double *Array, siz
 double *NormalSamplingArray(RNG_Seed *Seed, double Mu, double Sigma, size_t Size);
 
 // Test Random.h
-int main(int argc, char **argv)
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char **argv)
 {
     size_t Size = 1000000;
     size_t TestSize = 100;
@@ -53,10 +59,10 @@ int main(int argc, char **argv)
 
     // Generate seed
     RNG_Seed *Seed = RNG_SeedGenerate();
-    printf("Seed: %lu\n", *Seed);
+    printf("Seed: " PRINT_UINT64 "\n", *Seed);
 
     // Generate uniform ints
-    printf("Uniform ints: %lu, %lu, %lu\n", RNG_Int(Seed, 0, Bins - 1), RNG_Int(Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
+    printf("Uniform ints: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Int(Seed, 0, Bins - 1), RNG_Int(Seed, 0, Bins - 1), RNG_Int(NULL, 0, Bins - 1));
 
     IntArray = RNG_IntArray(Seed, 0, Bins - 1, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
@@ -70,14 +76,14 @@ int main(int argc, char **argv)
     for (uint64_t *List = IntArray, *EndList = IntArray + TestSize; List < EndList; ++List)
         if (*List != 0)
         {
-            printf("Error generating span 0 uniform ints: %lu\n", *List);
+            printf("Error generating span 0 uniform ints: " PRINT_UINT64 "\n", *List);
             return -1;
         }
 
     free(IntArray);
 
     // Test errors for ints
-    if (RNG_Int(Seed, 10, 9) != -1)
+    if (RNG_Int(Seed, 10, 9) != (uint64_t)-1)
     {
         printf("Excepted error for negative span int");
         return -1;
@@ -334,7 +340,7 @@ int main(int argc, char **argv)
     free(xFloat);
 
     // Generate Poisson
-    printf("Poisson Large: %lu, %lu, %lu\n", RNG_Poisson(Seed, 20), RNG_Poisson(Seed, 20), RNG_Poisson(NULL, 20));
+    printf("Poisson Large: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Poisson(Seed, 20), RNG_Poisson(Seed, 20), RNG_Poisson(NULL, 20));
 
     IntArray = RNG_PoissonArray(Seed, 20, Size);
     Hist = HistInt(20 - (Bins - 1) / 2, 20 + (Bins - 1) / 2, Bins, IntArray, Size);
@@ -352,7 +358,7 @@ int main(int argc, char **argv)
     free(xInt);
     free(FloatArray);
 
-    printf("Poisson Small: %lu, %lu, %lu\n", RNG_Poisson(Seed, 0.5), RNG_Poisson(Seed, 0.5), RNG_Poisson(NULL, 0.5));
+    printf("Poisson Small: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Poisson(Seed, 0.5), RNG_Poisson(Seed, 0.5), RNG_Poisson(NULL, 0.5));
 
     IntArray = RNG_PoissonArray(Seed, 0.5, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
@@ -370,7 +376,7 @@ int main(int argc, char **argv)
     free(xInt);
     free(FloatArray);
 
-    printf("Binomial Normal: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.5));
+    printf("Binomial Normal: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.5));
 
     IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.3, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
@@ -388,7 +394,7 @@ int main(int argc, char **argv)
     free(xInt);
     free(FloatArray);
 
-    printf("Binomial Small: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.02), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.02));
+    printf("Binomial Small: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Binomial(Seed, Bins - 1, 0.02), RNG_Binomial(Seed, Bins - 1, 0.5), RNG_Binomial(NULL, Bins - 1, 0.02));
 
     IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.02, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
@@ -406,7 +412,7 @@ int main(int argc, char **argv)
     free(xInt);
     free(FloatArray);
 
-    printf("Binomial Large: %lu, %lu, %lu\n", RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(NULL, Bins - 1, 0.98));
+    printf("Binomial Large: " PRINT_UINT64 ", " PRINT_UINT64 ", " PRINT_UINT64 "\n", RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(Seed, Bins - 1, 0.98), RNG_Binomial(NULL, Bins - 1, 0.98));
 
     IntArray = RNG_BinomialArray(Seed, Bins - 1, 0.98, Size);
     Hist = HistInt(0, Bins - 1, Bins, IntArray, Size);
@@ -444,9 +450,9 @@ void PrintIntArray(char *Name, uint64_t *Array, size_t Length)
     printf("%s: [", Name);
 
     for (uint64_t *List = Array, *EndList = Array + Length - 1; List < EndList; ++List)
-        printf("%lu, ", *List);
+        printf(PRINT_UINT64 ", ", *List);
 
-    printf("%lu]\n", Array[Length - 1]);
+    printf(PRINT_UINT64 "]\n", Array[Length - 1]);
 }
 
 void PrintFloatArray(char *Name, double *Array, size_t Length)

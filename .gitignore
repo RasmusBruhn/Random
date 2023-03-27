@@ -1,2 +1,4 @@
-Random_tb
+*_tb
 *.exe
+*.o
+*.dll
