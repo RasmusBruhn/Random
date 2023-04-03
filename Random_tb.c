@@ -1,4 +1,4 @@
-#include <Debug2.h>
+//#include <Debug2.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
@@ -440,7 +440,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char **argv)
     RNG_ErrorClear();
 
     printf("\n");
-    DBG_MemoryPrint();
+    //DBG_MemoryPrint();
 
     return 0;
 }
